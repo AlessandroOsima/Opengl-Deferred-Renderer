@@ -11,6 +11,7 @@
 #include <tchar.h>
 #include <string>
 #include <functional>
+#include <vector>
 #include <sstream>
 #include <iostream>
 #include <assert.h>

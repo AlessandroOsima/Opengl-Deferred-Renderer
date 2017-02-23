@@ -58,18 +58,19 @@ void Scene::Init()
 	int sizeX = info.Width;
 	int sizeY = info.Height;
 
-	int inWindowSizeX = sizeX / 4;
-	int inWindowSizeY = sizeY / 4;
+	constexpr float ScaleFactor = 2.14;
+	int inWindowSizeX = sizeX / ScaleFactor;
+	int inWindowSizeY = sizeY / ScaleFactor;
 
 	//ORIGINAL
 	Transform * originalTransform = static_cast<Transform*>(GameObjects[0]->GetComponentOfType(ComponentsType::Transform));
-	originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX, sizeY / 2 + inWindowSizeY, 0)));
+	originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY * 3, 0)));
 
 	originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 1.f)));
 
 	//SHARPEN
 	Transform * sharpenTransform = static_cast<Transform*>(GameObjects[1]->GetComponentOfType(ComponentsType::Transform));
-	sharpenTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX + sizeX / 2, sizeY / 2 + inWindowSizeY, 0)));
+	sharpenTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX * 3, inWindowSizeY * 3, 0)));
 
 	sharpenTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 1.f)));
 
@@ -81,7 +82,7 @@ void Scene::Init()
 
 	//FILTERED
 	Transform * filteredTransform = static_cast<Transform*>(GameObjects[3]->GetComponentOfType(ComponentsType::Transform));
-	filteredTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX + sizeX / 2, inWindowSizeY, 0)));
+	filteredTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX * 3, inWindowSizeY, 0)));
 
 	filteredTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 1.f)));
 
@@ -89,9 +90,10 @@ void Scene::Init()
 	size_t GrayscaleHash;
 	size_t BoxHash;
 	size_t SobelHash;
+	size_t ThresholdHash;
 
 
-	if (ShaderManager::GetShaderManager().CreateShader("base", "base.vs", "base.fs", BaseHash) && ShaderManager::GetShaderManager().CreateShader("grayscale", "grayscale.vs", "grayscale.fs", GrayscaleHash) && ShaderManager::GetShaderManager().CreateShader("box", "box.vs", "box.fs", BoxHash) &&  ShaderManager::GetShaderManager().CreateShader("sobel", "sobel.vs", "sobel.fs", SobelHash))
+	if (ShaderManager::GetShaderManager().CreateShader("threshold", "threshold.vs", "threshold.fs", ThresholdHash) && ShaderManager::GetShaderManager().CreateShader("base", "base.vs", "base.fs", BaseHash) && ShaderManager::GetShaderManager().CreateShader("grayscale", "grayscale.vs", "grayscale.fs", GrayscaleHash) && ShaderManager::GetShaderManager().CreateShader("box", "box.vs", "box.fs", BoxHash) &&  ShaderManager::GetShaderManager().CreateShader("sobel", "sobel.vs", "sobel.fs", SobelHash))
 	{
 		//Set Up Renderpasses on Objects
 		{
@@ -168,14 +170,26 @@ void Scene::Init()
 
 			/*Material passSharpenMaterial{ textureID, BoxHash };
 			RenderPass passSharpen(std::move(passSharpenMaterial), false, true);
-			UniformTypeData sharpenUniformData{ Filters::GenerateSharpenMatrix(8) };
+			UniformTypeData sharpenUniformData{ Filters::GenerateLaplacian() };
 			UniformsToBind sharpenUniform{ "Mask", sharpenUniformData, UniformType::Mat3 };
 			passSharpen.AddUniform(sharpenUniform);
 			passGroup.RenderPasses.push_back(std::move(passSharpen));*/
 
 			Material passSobelMaterial{ textureID, SobelHash };
-			RenderPass passSobel(std::move(passSobelMaterial), true, true);
+			RenderPass passSobel(std::move(passSobelMaterial), false, true);
 			passGroup.RenderPasses.push_back(std::move(passSobel));
+
+			Material thresholdMaterial{ textureID, ThresholdHash };
+			RenderPass passThreshold(std::move(thresholdMaterial), true, true);
+			UniformTypeData thresholdUniformData = { glm::mat3{} };
+			thresholdUniformData.floatVal = 0.3f;
+			UniformsToBind thresholdUniform{ "threshold", thresholdUniformData, UniformType::Float };
+			passThreshold.AddUniform(thresholdUniform);
+			passGroup.RenderPasses.push_back(std::move(passThreshold));
+
+		/*	Material passSobelMaterial{ textureID, SobelHash };
+			RenderPass passSobel(std::move(passSobelMaterial), true, true);
+			passGroup.RenderPasses.push_back(std::move(passSobel));*/
 
 			Renderable * filteredRenderable = static_cast<Renderable*>(GameObjects[3]->GetComponentOfType(ComponentsType::Renderable));
 			filteredRenderable->AddPassesOnMesh(std::move(passGroup));

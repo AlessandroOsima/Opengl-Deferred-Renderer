@@ -15,6 +15,7 @@
 #include "Renderer/GLUtilities.h"
 #include "Renderer/RenderableScene.h"
 #include "GameObjects/Scene.h"
+#include "Managers/InputManager.h"
 
 
 GLFWwindow * CreateWindow(const WindowInfo & Window, const std::string & WindowTitle)
@@ -38,6 +39,7 @@ int main()
 	Logger::GetLogger().LogOnFile(true);
 
 	GLRenderer renderer;
+	InputManager & InputManagerInstance = InputManager::GetInputManager();
 
 	if (glfwInit() == GL_FALSE)
 	{
@@ -45,7 +47,7 @@ int main()
 	}
 
 
-	WindowInfo windowInfo{ 1599, 1000 };
+	WindowInfo windowInfo{ 1300, 900 };
 	GLFWwindow * window = CreateWindow(windowInfo, "OpenGL Renderer - Filtering");
 
 	if (!window)
@@ -62,7 +64,7 @@ int main()
 		return -1;
 	}
 
-
+	InputManagerInstance.Initialize(*window);
 	RenderableScene renderScene(renderer);
 	Scene scene(renderScene);
 
@@ -79,13 +81,15 @@ int main()
 		
 		glfwPollEvents();
 
+		
+
 		scene.Update(DeltaTime);
 		renderScene.RenderScene(DeltaTime);
 
-		std::stringstream stream;
-		stream << DeltaTime << std::ends;
+		//std::stringstream stream;
+		//stream << DeltaTime << std::ends;
 
-		Logger::GetLogger().LogString(stream.str(), LogType::LOG);
+		//Logger::GetLogger().LogString(stream.str(), LogType::LOG);
 
 		EndTime = glfwGetTime();
 

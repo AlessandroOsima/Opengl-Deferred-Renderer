@@ -38,7 +38,7 @@ void main()
    sum += textureOffset(diffuseSampler, uvCoords, ivec2(1,1)) * SobelY[2].z;
 
 
-      //Up 1 col
+   //Up 1 col
    sum += textureOffset(diffuseSampler, uvCoords, ivec2(-1,-1)) * SobelX[0].x;
    sum += textureOffset(diffuseSampler, uvCoords, ivec2(0,-1)) * SobelX[0].y;
    sum += textureOffset(diffuseSampler, uvCoords, ivec2(1,-1)) * SobelX[0].z;

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Managers\InputManager.cpp" />
     <ClCompile Include="Source\Logger\Assert.cpp" />
     <ClCompile Include="Source\Renderer\FontRenderer.cpp" />
     <ClCompile Include="Source\Renderer\Material.cpp" />
@@ -52,6 +53,7 @@
     <ClInclude Include="Libs\stb\stb_image_write.h" />
     <ClInclude Include="Libs\stb\stb_truetype.h" />
     <ClInclude Include="Source\Logger\Asserts.h" />
+    <ClInclude Include="Source\Managers\InputManager.h" />
     <ClInclude Include="Source\Renderer\Font.h" />
     <ClInclude Include="Source\Renderer\FontRenderer.h" />
     <ClInclude Include="Source\Renderer\Material.h" />
