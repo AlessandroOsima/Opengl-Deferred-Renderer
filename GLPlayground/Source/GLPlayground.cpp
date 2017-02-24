@@ -85,15 +85,24 @@ int main()
 
 		scene.Update(DeltaTime);
 		renderScene.RenderScene(DeltaTime);
+<<<<<<< Updated upstream
 
 		//std::stringstream stream;
 		//stream << DeltaTime << std::ends;
 
 		//Logger::GetLogger().LogString(stream.str(), LogType::LOG);
+=======
+	
+		/*std::stringstream stream;
+		stream << DeltaTime << std::ends;
+
+		Logger::GetLogger().LogString(stream.str(), LogType::LOG);*/
+>>>>>>> Stashed changes
 
 		EndTime = glfwGetTime();
 
 		DeltaTime = static_cast<float>(EndTime - StartTime);
+
 	}
 
 	scene.DeInit();

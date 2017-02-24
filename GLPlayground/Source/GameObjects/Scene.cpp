@@ -7,7 +7,7 @@
 #include "Managers/ShaderManager.h"
 #include "Logger/Logger.h"
 #include "GameObjects/Components/Transform.h"
-#include "GameObjects/Objects/TexturedGameObject.h"
+#include "GameObjects/Objects/TexturedObject.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "Math/Filters.h"
 #include "Managers/TextureManager.h"
@@ -22,19 +22,19 @@ Scene::Scene(RenderableScene & RenderScene) : RenderScene(RenderScene)
 
 void Scene::Init()
 {
-	std::unique_ptr<Object> orginal = std::make_unique<TexturedGameObject>();
+	std::unique_ptr<Object> orginal = std::make_unique<TexturedObject>();
 	orginal->SetLogicScene(this);
 	GameObjects.push_back(std::move(orginal));
 
-	std::unique_ptr<Object> sharpen = std::make_unique<TexturedGameObject>();
+	std::unique_ptr<Object> sharpen = std::make_unique<TexturedObject>();
 	sharpen->SetLogicScene(this);
 	GameObjects.push_back(std::move(sharpen));
 
-	std::unique_ptr<Object> smooth = std::make_unique<TexturedGameObject>();
+	std::unique_ptr<Object> smooth = std::make_unique<TexturedObject>();
 	smooth->SetLogicScene(this);
 	GameObjects.push_back(std::move(smooth));
 
-	std::unique_ptr<Object> sobel = std::make_unique<TexturedGameObject>();
+	std::unique_ptr<Object> sobel = std::make_unique<TexturedObject>();
 	sobel->SetLogicScene(this);
 	GameObjects.push_back(std::move(sobel));
 
@@ -109,20 +109,14 @@ void Scene::Init()
 			Text * originalText = static_cast<Text*>(GameObjects[0]->GetComponentOfType(ComponentsType::Text));
 			originalText->SetText("ORIGINAL", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 
-			//originalText->SetText("#FUCKUNITY", glm::vec4(0.5, 1, 0, 1), glm::vec3(sizeX / 2 - 150, sizeY / 2, -0.1f), "arial.ttf", true, false);
-
 		}
 
 		{
 			RenderPassGroup sharpenPassGroup(sizeX, sizeY);
 
-			Material passGrayMaterial{ textureID, GrayscaleHash };
-			RenderPass passGray(std::move(passGrayMaterial), false, true);
-			sharpenPassGroup.RenderPasses.push_back(std::move(passGray));
-
 			Material passSharpMaterial{ textureID, BoxHash };
 			RenderPass passSharp(std::move(passSharpMaterial), true, true);
-			UniformTypeData sharpUniformData{ Filters::GenerateSharpenMatrix(9) };
+			UniformTypeData sharpUniformData{ Filters::GenerateSharpenFactor5() };
 			UniformsToBind sharpUniform{ "Mask", sharpUniformData, UniformType::Mat3 };
 			passSharp.AddUniform(sharpUniform);
 
@@ -132,7 +126,7 @@ void Scene::Init()
 			sharpenRenderable->AddPassesOnMesh(std::move(sharpenPassGroup));
 
 			Text * sharpenText = static_cast<Text*>(GameObjects[1]->GetComponentOfType(ComponentsType::Text));
-			sharpenText->SetText("GRAYSCALE + SHARPEN 3x3 FACTOR 9", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-280, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			sharpenText->SetText("GRAYSCALE + SHARPEN 3x3 FACTOR 5", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-280, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 
 		} 
 		
@@ -150,7 +144,7 @@ void Scene::Init()
 			renderable->AddPassesOnMesh(std::move(passGroup));
 
 			Text * smoothText = static_cast<Text*>(GameObjects[2]->GetComponentOfType(ComponentsType::Text));
-			smoothText->SetText("SMOOTH", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			smoothText->SetText("BLUR 3x3", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 
 		}
 
@@ -168,6 +162,7 @@ void Scene::Init()
 			passSmooth.AddUniform(smoothUniform);
 			passGroup.RenderPasses.push_back(std::move(passSmooth));
 
+<<<<<<< Updated upstream
 			/*Material passSharpenMaterial{ textureID, BoxHash };
 			RenderPass passSharpen(std::move(passSharpenMaterial), false, true);
 			UniformTypeData sharpenUniformData{ Filters::GenerateLaplacian() };
@@ -175,6 +170,8 @@ void Scene::Init()
 			passSharpen.AddUniform(sharpenUniform);
 			passGroup.RenderPasses.push_back(std::move(passSharpen));*/
 
+=======
+>>>>>>> Stashed changes
 			Material passSobelMaterial{ textureID, SobelHash };
 			RenderPass passSobel(std::move(passSobelMaterial), false, true);
 			passGroup.RenderPasses.push_back(std::move(passSobel));
@@ -195,7 +192,7 @@ void Scene::Init()
 			filteredRenderable->AddPassesOnMesh(std::move(passGroup));
 
 			Text * filteredText = static_cast<Text*>(GameObjects[3]->GetComponentOfType(ComponentsType::Text));
-			filteredText->SetText("GRAYSCALE + SMOOTH 3x3 + SOBEL", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-250, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			filteredText->SetText("GRAYSCALE + BLUR 3x3 + SOBEL", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-250, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 		}
 	}
 
