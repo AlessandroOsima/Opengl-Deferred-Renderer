@@ -150,7 +150,7 @@ void Scene::Init()
 			renderable->AddPassesOnMesh(std::move(passGroup));
 
 			Text * smoothText = static_cast<Text*>(GameObjects[2]->GetComponentOfType(ComponentsType::Text));
-			smoothText->SetText("SMOOTH", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			smoothText->SetText("BLUR", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 
 		}
 
@@ -169,33 +169,29 @@ void Scene::Init()
 			passGroup.RenderPasses.push_back(std::move(passSmooth));
 
 			/*Material passSharpenMaterial{ textureID, BoxHash };
-			RenderPass passSharpen(std::move(passSharpenMaterial), false, true);
+			RenderPass passSharpen(std::move(passSharpenMaterial), true, true);
 			UniformTypeData sharpenUniformData{ Filters::GenerateLaplacian() };
 			UniformsToBind sharpenUniform{ "Mask", sharpenUniformData, UniformType::Mat3 };
 			passSharpen.AddUniform(sharpenUniform);
 			passGroup.RenderPasses.push_back(std::move(passSharpen));*/
 
 			Material passSobelMaterial{ textureID, SobelHash };
-			RenderPass passSobel(std::move(passSobelMaterial), false, true);
+			RenderPass passSobel(std::move(passSobelMaterial), true, true);
 			passGroup.RenderPasses.push_back(std::move(passSobel));
 
 			Material thresholdMaterial{ textureID, ThresholdHash };
 			RenderPass passThreshold(std::move(thresholdMaterial), true, true);
 			UniformTypeData thresholdUniformData = { glm::mat3{} };
-			thresholdUniformData.floatVal = 0.3f;
+			thresholdUniformData.floatVal = 0.19f;
 			UniformsToBind thresholdUniform{ "threshold", thresholdUniformData, UniformType::Float };
 			passThreshold.AddUniform(thresholdUniform);
 			passGroup.RenderPasses.push_back(std::move(passThreshold));
-
-		/*	Material passSobelMaterial{ textureID, SobelHash };
-			RenderPass passSobel(std::move(passSobelMaterial), true, true);
-			passGroup.RenderPasses.push_back(std::move(passSobel));*/
 
 			Renderable * filteredRenderable = static_cast<Renderable*>(GameObjects[3]->GetComponentOfType(ComponentsType::Renderable));
 			filteredRenderable->AddPassesOnMesh(std::move(passGroup));
 
 			Text * filteredText = static_cast<Text*>(GameObjects[3]->GetComponentOfType(ComponentsType::Text));
-			filteredText->SetText("GRAYSCALE + SMOOTH 3x3 + SOBEL", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-250, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			filteredText->SetText("GRAYSCALE + BLUR + SOBEL + THRESHOLD", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-300, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 		}
 	}
 

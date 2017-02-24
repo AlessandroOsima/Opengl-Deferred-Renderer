@@ -12,7 +12,7 @@ void InputManager::KeyCallback(GLFWwindow* window, int key, int scancode, int ac
 
 	for (auto keyFunction : ManagerSingleton.KeyEvents)
 	{
-		keyFunction(key, KeyState::PRESSED);
+		keyFunction(static_cast<KeyState>(key), static_cast<KeyCode>(action));
 	}
 }
 
@@ -22,3 +22,9 @@ InputManager & InputManager::GetInputManager()
 
 	return Manager;
 }
+
+void InputManager::operator+=(KeyCallbackFunction Function)
+{
+	KeyEvents.push_back(Function);
+}
+
