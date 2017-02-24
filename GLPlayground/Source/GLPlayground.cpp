@@ -47,7 +47,7 @@ int main()
 	}
 
 
-	WindowInfo windowInfo{ 1300, 900 };
+	WindowInfo windowInfo{ 1340, 880 };
 	GLFWwindow * window = CreateWindow(windowInfo, "OpenGL Renderer - Filtering");
 
 	if (!window)
@@ -85,19 +85,11 @@ int main()
 
 		scene.Update(DeltaTime);
 		renderScene.RenderScene(DeltaTime);
-<<<<<<< Updated upstream
 
 		//std::stringstream stream;
 		//stream << DeltaTime << std::ends;
 
 		//Logger::GetLogger().LogString(stream.str(), LogType::LOG);
-=======
-	
-		/*std::stringstream stream;
-		stream << DeltaTime << std::ends;
-
-		Logger::GetLogger().LogString(stream.str(), LogType::LOG);*/
->>>>>>> Stashed changes
 
 		EndTime = glfwGetTime();
 

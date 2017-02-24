@@ -114,9 +114,13 @@ void Scene::Init()
 		{
 			RenderPassGroup sharpenPassGroup(sizeX, sizeY);
 
+			Material passGrayMaterial{ textureID, GrayscaleHash };
+			RenderPass passGray(std::move(passGrayMaterial), false, true);
+			sharpenPassGroup.RenderPasses.push_back(std::move(passGray));
+
 			Material passSharpMaterial{ textureID, BoxHash };
 			RenderPass passSharp(std::move(passSharpMaterial), true, true);
-			UniformTypeData sharpUniformData{ Filters::GenerateSharpenFactor5() };
+			UniformTypeData sharpUniformData{ Filters::GenerateSharpenMatrix(true) };
 			UniformsToBind sharpUniform{ "Mask", sharpUniformData, UniformType::Mat3 };
 			passSharp.AddUniform(sharpUniform);
 
@@ -126,8 +130,7 @@ void Scene::Init()
 			sharpenRenderable->AddPassesOnMesh(std::move(sharpenPassGroup));
 
 			Text * sharpenText = static_cast<Text*>(GameObjects[1]->GetComponentOfType(ComponentsType::Text));
-			sharpenText->SetText("GRAYSCALE + SHARPEN 3x3 FACTOR 5", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-280, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
-
+			sharpenText->SetText("GRAYSCALE + SHARPEN 3x3 FACTOR 9", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-280, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 		} 
 		
 		{
@@ -145,7 +148,6 @@ void Scene::Init()
 
 			Text * smoothText = static_cast<Text*>(GameObjects[2]->GetComponentOfType(ComponentsType::Text));
 			smoothText->SetText("BLUR 3x3", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
-
 		}
 
 		{
@@ -162,7 +164,6 @@ void Scene::Init()
 			passSmooth.AddUniform(smoothUniform);
 			passGroup.RenderPasses.push_back(std::move(passSmooth));
 
-<<<<<<< Updated upstream
 			/*Material passSharpenMaterial{ textureID, BoxHash };
 			RenderPass passSharpen(std::move(passSharpenMaterial), false, true);
 			UniformTypeData sharpenUniformData{ Filters::GenerateLaplacian() };
@@ -170,8 +171,6 @@ void Scene::Init()
 			passSharpen.AddUniform(sharpenUniform);
 			passGroup.RenderPasses.push_back(std::move(passSharpen));*/
 
-=======
->>>>>>> Stashed changes
 			Material passSobelMaterial{ textureID, SobelHash };
 			RenderPass passSobel(std::move(passSobelMaterial), false, true);
 			passGroup.RenderPasses.push_back(std::move(passSobel));
@@ -179,7 +178,7 @@ void Scene::Init()
 			Material thresholdMaterial{ textureID, ThresholdHash };
 			RenderPass passThreshold(std::move(thresholdMaterial), true, true);
 			UniformTypeData thresholdUniformData = { glm::mat3{} };
-			thresholdUniformData.floatVal = 0.3f;
+			thresholdUniformData.floatVal = 0.2f;
 			UniformsToBind thresholdUniform{ "threshold", thresholdUniformData, UniformType::Float };
 			passThreshold.AddUniform(thresholdUniform);
 			passGroup.RenderPasses.push_back(std::move(passThreshold));
@@ -192,7 +191,7 @@ void Scene::Init()
 			filteredRenderable->AddPassesOnMesh(std::move(passGroup));
 
 			Text * filteredText = static_cast<Text*>(GameObjects[3]->GetComponentOfType(ComponentsType::Text));
-			filteredText->SetText("GRAYSCALE + BLUR 3x3 + SOBEL", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-250, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			filteredText->SetText("GRAYSCALE + BLUR 3x3 + SOBEL + THRESHOLD", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-315, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 		}
 	}
 
