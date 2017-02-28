@@ -48,7 +48,7 @@ int main()
 	}
 
 
-	WindowInfo windowInfo{ 1300, 900 };
+	WindowInfo windowInfo{ 1340, 880 };
 	GLFWwindow * window = CreateWindow(windowInfo, "OpenGL Renderer - Filtering");
 
 	if (!window)
@@ -103,6 +103,7 @@ int main()
 		EndTime = glfwGetTime();
 
 		DeltaTime = static_cast<float>(EndTime - StartTime);
+
 	}
 
 	scene.DeInit();
