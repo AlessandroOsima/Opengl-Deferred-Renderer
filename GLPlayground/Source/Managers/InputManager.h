@@ -9,13 +9,13 @@ class InputManager
 public:
 	void Initialize(GLFWwindow & Window);
 
-	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 	static InputManager & GetInputManager();
 
 	void operator+=(KeyCallbackFunction Function);
 
 private:
+	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 	std::list<KeyCallbackFunction> KeyEvents;
 };
 

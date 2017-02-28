@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Math/Filters.h"
 #include "Managers/TextureManager.h"
+#include "Managers/InputManager.h"
 #include "GameObjects/Components/Text.h"
 
 
@@ -194,8 +195,6 @@ void Scene::Init()
 			filteredText->SetText("GRAYSCALE + BLUR + SOBEL + THRESHOLD", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-300, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 		}
 	}
-
-
 }
 
 void Scene::Update(float DeltaTime)
