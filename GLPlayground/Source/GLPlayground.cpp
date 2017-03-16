@@ -11,6 +11,7 @@
 #include <strstream>
 #include "Logger/Logger.h"
 #include "Managers/ResourceManager.h"
+#include "Managers/InputManager.h"
 #include "Renderer/Texture.h"
 #include "Renderer/GLUtilities.h"
 #include "Renderer/RenderableScene.h"
@@ -75,13 +76,21 @@ int main()
 	double StartTime, EndTime;
 	float DeltaTime = 0;
 
-	while (!glfwWindowShouldClose(window))
+	bool ShouldTerminate = false;
+	InputManager::GetInputManager() += [&](KeyState keyState, KeyCode keyCode)
+	{
+		if (keyCode == KeyCode::Escape && keyState == KeyState::PRESSED)
+		{
+			ShouldTerminate = true;
+			Logger::GetLogger().LogString("Escape Key Detected, Terminating", LogType::LOG);
+		}
+	};
+
+	while (!ShouldTerminate && !glfwWindowShouldClose(window))
 	{
 		StartTime = glfwGetTime();
 		
 		glfwPollEvents();
-
-		
 
 		scene.Update(DeltaTime);
 		renderScene.RenderScene(DeltaTime);

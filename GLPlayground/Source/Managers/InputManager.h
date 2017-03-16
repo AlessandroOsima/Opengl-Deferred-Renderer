@@ -1,23 +1,21 @@
 #pragma once
-#include <GLFW/glfw3.h>
+#include "Input/Input.h"
 #include <list>
 
-enum class  KeyState
-{
-	PRESSED,
-	RELEASED
-};
+using KeyCallbackFunction = std::function<void(KeyState, KeyCode)>;
 
 class InputManager
 {
 public:
 	void Initialize(GLFWwindow & Window);
 
-	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 	static InputManager & GetInputManager();
 
+	void operator+=(KeyCallbackFunction Function);
+
 private:
-	std::list<std::function<void(int, KeyState)>> KeyEvents;
+	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+	std::list<KeyCallbackFunction> KeyEvents;
 };
 

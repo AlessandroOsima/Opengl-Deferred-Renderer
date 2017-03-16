@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Math/Filters.h"
 #include "Managers/TextureManager.h"
+#include "Managers/InputManager.h"
 #include "GameObjects/Components/Text.h"
 
 
@@ -165,14 +166,14 @@ void Scene::Init()
 			passGroup.RenderPasses.push_back(std::move(passSmooth));
 
 			/*Material passSharpenMaterial{ textureID, BoxHash };
-			RenderPass passSharpen(std::move(passSharpenMaterial), false, true);
+			RenderPass passSharpen(std::move(passSharpenMaterial), true, true);
 			UniformTypeData sharpenUniformData{ Filters::GenerateLaplacian() };
 			UniformsToBind sharpenUniform{ "Mask", sharpenUniformData, UniformType::Mat3 };
 			passSharpen.AddUniform(sharpenUniform);
 			passGroup.RenderPasses.push_back(std::move(passSharpen));*/
 
 			Material passSobelMaterial{ textureID, SobelHash };
-			RenderPass passSobel(std::move(passSobelMaterial), false, true);
+			RenderPass passSobel(std::move(passSobelMaterial), true, true);
 			passGroup.RenderPasses.push_back(std::move(passSobel));
 
 			Material thresholdMaterial{ textureID, ThresholdHash };
@@ -183,10 +184,6 @@ void Scene::Init()
 			passThreshold.AddUniform(thresholdUniform);
 			passGroup.RenderPasses.push_back(std::move(passThreshold));
 
-		/*	Material passSobelMaterial{ textureID, SobelHash };
-			RenderPass passSobel(std::move(passSobelMaterial), true, true);
-			passGroup.RenderPasses.push_back(std::move(passSobel));*/
-
 			Renderable * filteredRenderable = static_cast<Renderable*>(GameObjects[3]->GetComponentOfType(ComponentsType::Renderable));
 			filteredRenderable->AddPassesOnMesh(std::move(passGroup));
 
@@ -194,8 +191,6 @@ void Scene::Init()
 			filteredText->SetText("GRAYSCALE + BLUR 3x3 + SOBEL + THRESHOLD", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-315, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
 		}
 	}
-
-
 }
 
 void Scene::Update(float DeltaTime)

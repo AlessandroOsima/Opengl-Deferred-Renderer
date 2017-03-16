@@ -52,6 +52,7 @@
   <ItemGroup>
     <ClInclude Include="Libs\stb\stb_image_write.h" />
     <ClInclude Include="Libs\stb\stb_truetype.h" />
+    <ClInclude Include="Source\Input\Input.h" />
     <ClInclude Include="Source\Logger\Asserts.h" />
     <ClInclude Include="Source\Managers\InputManager.h" />
     <ClInclude Include="Source\Renderer\Font.h" />
