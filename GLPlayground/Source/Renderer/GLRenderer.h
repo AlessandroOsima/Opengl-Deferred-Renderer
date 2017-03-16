@@ -19,7 +19,8 @@ public:
 	void Clear();
 	void Present();
 	void DrawMesh(Mesh & mesh);
-	void Draw();
+
+	void EnableDepthTest(bool Enable);
 
 	~GLRenderer();
 
@@ -31,6 +32,6 @@ public:
 
 private:
 	GLFWwindow * Context;
-
+	bool DepthTestEnabled = false;
 };
 

@@ -6,7 +6,7 @@
 #include "GLUtilities.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-RenderableScene::RenderableScene(GLRenderer & Renderer) : Renderer(Renderer), BaseMaterial(0,0)
+RenderableScene::RenderableScene(GLRenderer & Renderer) : Renderer(Renderer), BaseMaterial(0, 0)
 {
 }
 
@@ -23,7 +23,7 @@ void RenderableScene::Initialize()
 	WindowInfo info;
 	Renderer.GetCurrentWindowInfo(info);
 
-	CurrentProjection = glm::ortho((float)0, (float)info.Width, (float)0, (float)info.Height, 0.f, 1.f);
+	CurrentProjection = glm::ortho((float)0, (float)info.Width, (float)0, (float)info.Height, 0.f, 100.f);
 
 	ShaderManager::GetShaderManager().OnShaderAdded = [&](size_t HashedProgram)
 	{
@@ -68,28 +68,25 @@ void RenderableScene::RenderScene(float DeltaTime)
 	Renderer.Clear();
 
 
-	for (auto & mesh : Meshes)
+	for (auto & mesh : MeshList)
 	{
 		//Render with only one pass
-		if (mesh.Location == InvalidRenderpassIndex)
+		if (mesh.Location == PassList.end())
 		{
 			Logger::GetLogger().LogString("mesh does not have a valid renderpass", LogType::ERROR);
 		}
 		else
 		{
-
-			RenderPassGroup & group = Passes[mesh.Location];
-			
 			bool found;
 
-			Texture & colorTarget = TextureManager::GetTextureManager().GetTextureFromID(group.GetOffscreenTexture(), found);
-			Texture & textureAttachment = TextureManager::GetTextureManager().GetTextureFromID(group.GetAttachmentTexture(), found);
+			Texture & colorTarget = TextureManager::GetTextureManager().GetTextureFromID(mesh.Location->GetOffscreenTexture(), found);
+			Texture & textureAttachment = TextureManager::GetTextureManager().GetTextureFromID(mesh.Location->GetAttachmentTexture(), found);
 
-			size_t attachmentTexture = group.RenderPasses[0].GetMaterial().DiffuseTexture;
+			size_t attachmentTexture = mesh.Location->RenderPasses[0].GetMaterial().DiffuseTexture;
 			size_t original;
 
 			//Do all the addictive passes
-			for (int i = 0; i < group.RenderPasses.size(); i++)
+			for (int i = 0; i < mesh.Location->RenderPasses.size(); i++)
 			{
 				//The viewport is the size of the texture we are rendering
 				glViewport(0, 0, colorTarget.GetTextureInfo().Width, colorTarget.GetTextureInfo().Height);
@@ -103,19 +100,19 @@ void RenderableScene::RenderScene(float DeltaTime)
 
 				mesh.Mesh->Bind();
 
-				if (group.RenderPasses[i].UsePreviousPassAsAttachment)
+				if (mesh.Location->RenderPasses[i].UsePreviousPassAsAttachment)
 				{
-					original = group.RenderPasses[i].GetMaterial().DiffuseTexture;
-					group.RenderPasses[i].GetMaterial().DiffuseTexture = attachmentTexture;
+					original = mesh.Location->RenderPasses[i].GetMaterial().DiffuseTexture;
+					mesh.Location->RenderPasses[i].GetMaterial().DiffuseTexture = attachmentTexture;
 				}
 
-				group.RenderPasses[i].GetMaterial().Bind();
-				group.RenderPasses[i].BindUniforms();
+				mesh.Location->RenderPasses[i].GetMaterial().Bind();
+				mesh.Location->RenderPasses[i].BindUniforms();
 
 				bool ShaderFound;
 
-				ShaderProgram & program = ShaderManager::GetShaderManager().GetShader(group.RenderPasses[i].GetMaterial().Program, ShaderFound);
-			
+				ShaderProgram & program = ShaderManager::GetShaderManager().GetShader(mesh.Location->RenderPasses[i].GetMaterial().Program, ShaderFound);
+
 				AssertWithMessage(ShaderFound, "Unable to find shader");
 
 				constexpr unsigned int MatricesBindingLocation = 0;
@@ -129,21 +126,21 @@ void RenderableScene::RenderScene(float DeltaTime)
 
 				Renderer.DrawMesh(*mesh.Mesh);
 
-				group.RenderPasses[i].GetMaterial().UnBind();
+				mesh.Location->RenderPasses[i].GetMaterial().UnBind();
 				mesh.Mesh->Unbind();
 
-				if (group.RenderPasses[i].UsePreviousPassAsAttachment)
+				if (mesh.Location->RenderPasses[i].UsePreviousPassAsAttachment)
 				{
 					//Copy the framebuffer color target to another texture to use as input for the fragment shader in the RenderPass
 					glBindTexture(GL_TEXTURE_2D, textureAttachment.GetID());
 					glCheckFunction(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, colorTarget.GetTextureInfo().Width, colorTarget.GetTextureInfo().Height));
 					glBindTexture(GL_TEXTURE_2D, 0);
 
-					group.RenderPasses[i].GetMaterial().DiffuseTexture = original;
-					attachmentTexture = group.GetAttachmentTexture();
+					mesh.Location->RenderPasses[i].GetMaterial().DiffuseTexture = original;
+					attachmentTexture = mesh.Location->GetAttachmentTexture();
 				}
 
-				if (group.RenderPasses[i].RenderOnMainFramebuffer)
+				if (mesh.Location->RenderPasses[i].RenderOnMainFramebuffer)
 				{
 					//Render the mesh in the main framebuffer
 					OffscreenFramebuffer.UnbindFramebufferAttachment(FrameBufferAttachmentType::COLOR);
@@ -155,7 +152,7 @@ void RenderableScene::RenderScene(float DeltaTime)
 
 					BaseMaterial.DiffuseTexture = attachmentTexture;
 					BaseMaterial.Bind();
-					
+
 					//Since we are rendering on the main window we need to use the correct matrices
 					glNamedBufferSubData(UniformMatricesBufferID, 0, sizeof(glm::mat4), &CurrentProjection);
 					glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4), sizeof(glm::mat4), &CurrentView);
@@ -165,7 +162,7 @@ void RenderableScene::RenderScene(float DeltaTime)
 
 					BaseMaterial.UnBind();
 					mesh.Mesh->Unbind();
-				
+
 				}
 			}
 
@@ -201,28 +198,19 @@ void RenderableScene::DeInitialize()
 
 RenderableMeshLocation RenderableScene::AddMesh(std::shared_ptr<Mesh> MeshToAdd)
 {
-	MeshStorageInfo info;  
+	MeshStorageInfo info;
 	info.Mesh = MeshToAdd;
-	info.Location = InvalidRenderpassIndex;
+	info.Location = PassList.end();
 
-	if (FirstRenderableMeshFree >= Meshes.size())
-	{
-		Meshes.push_back(info);
-	}
-	else
-	{
-		Meshes[FirstRenderableMeshFree] = info;
-	}
-	
-	FirstRenderableMeshFree = Meshes.size();
-	return FirstRenderableMeshFree - 1;
+	MeshList.push_back(info);
+	return --MeshList.end();
 }
 
 RenderableMeshLocation RenderableScene::AddMeshMultipass(std::shared_ptr<Mesh> MeshToAdd, RenderPassGroup && PassesToAdd)
 {
-	RenderablPassLocation passLoc = AddRenderPassGroup(std::move(PassesToAdd));
+	RenderablePassLocation passLoc = AddRenderPassGroup(std::move(PassesToAdd));
 	RenderableMeshLocation meshLoc = AddMesh(MeshToAdd);
-	
+
 	LinkMeshMultiPass(meshLoc, passLoc);
 
 	return meshLoc;
@@ -230,56 +218,26 @@ RenderableMeshLocation RenderableScene::AddMeshMultipass(std::shared_ptr<Mesh> M
 
 void RenderableScene::RemoveMesh(RenderableMeshLocation Location)
 {
-	if (Location >= Meshes.size())
-	{
-		return;
-	}
-
-	FirstRenderableMeshFree = Location;
-	Meshes.erase(Meshes.begin() + Location);
+	MeshList.erase(Location);
 }
 
 
-RenderablPassLocation RenderableScene::AddRenderPassGroup(RenderPassGroup && PassesToAdd)
+RenderablePassLocation RenderableScene::AddRenderPassGroup(RenderPassGroup && PassToAdd)
 {
-	if (FirstRenderPassFree >= Passes.size())
-	{
-		Passes.push_back(std::move(PassesToAdd));
-		Passes[Passes.size() - 1].Init();
-	}
-	else
-	{
-		Passes[FirstRenderPassFree] = std::move(PassesToAdd);
-		Passes[FirstRenderPassFree].Init();
-	}
-
-	
-
-	FirstRenderPassFree = Passes.size();
-	return FirstRenderPassFree - 1;
+	PassToAdd.Init();
+	PassList.push_back(std::move(PassToAdd));
+	return --PassList.end();
 }
 
-void RenderableScene::RemoveRenderPassGroup(RenderablPassLocation Location)
+void RenderableScene::RemoveRenderPassGroup(RenderablePassLocation Location)
 {
-	if (Location >= Passes.size())
-	{
-		return;
-	}
-
-	FirstRenderPassFree = Location;
-	Passes[Location].DeInit();
-
-	Passes.erase(Passes.begin() + Location);
+	PassList.erase(Location);
 }
 
-bool RenderableScene::LinkMeshMultiPass(RenderableMeshLocation Mesh, RenderablPassLocation Pass)
+bool RenderableScene::LinkMeshMultiPass(RenderableMeshLocation Mesh, RenderablePassLocation Pass)
 {
-	if (Mesh >= Meshes.size() && Pass >= Passes.size())
-	{
-		return false;
-	}
 
-	Meshes[Mesh].Location = Pass;
+	Mesh->Location = Pass;
 
 	return true;
 }

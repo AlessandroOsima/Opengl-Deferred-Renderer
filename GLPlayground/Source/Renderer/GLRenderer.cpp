@@ -55,7 +55,7 @@ bool GLRenderer::Initialize(GLFWwindow * Window)
 void GLRenderer::Clear()
 {
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void GLRenderer::Present()
@@ -68,13 +68,10 @@ void GLRenderer::DrawMesh(Mesh & mesh)
 	glDrawElements(GL_TRIANGLES, (GLsizei)mesh.GetIndices().size(), GL_UNSIGNED_INT, 0);
 }
 
-void GLRenderer::Draw()
+void GLRenderer::EnableDepthTest(bool Enable)
 {
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-
-	glfwSwapBuffers(Context);
+	DepthTestEnabled = Enable;
+	Enable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
 GLRenderer::~GLRenderer()

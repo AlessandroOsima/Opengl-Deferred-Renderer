@@ -6,19 +6,17 @@
 #include "Renderer/Framebuffer.h"
 #include "Renderer/RenderPass.h"
 #include <limits>
-
-
-using RenderableMeshLocation = uint64_t;
-using RenderablPassLocation = uint64_t;
-
-constexpr RenderablPassLocation InvalidRenderpassIndex = std::numeric_limits<size_t>::max();
-
+#include <list>
 
 struct MeshStorageInfo
 {
 	std::shared_ptr<Mesh> Mesh;
-	RenderablPassLocation Location = InvalidRenderpassIndex;
+	std::list<RenderPassGroup>::iterator Location;
 };
+
+using RenderableMeshLocation = std::list<MeshStorageInfo>::iterator;
+using RenderablePassLocation = std::list<RenderPassGroup>::iterator;
+
 
 class RenderableScene
 {
@@ -35,17 +33,22 @@ public:
 
 	RenderableMeshLocation AddMesh(std::shared_ptr<Mesh> MeshToAdd);
 	RenderableMeshLocation AddMeshMultipass(std::shared_ptr<Mesh> MeshToAdd, RenderPassGroup && PassesToAdd);
-	
+
 	void RemoveMesh(RenderableMeshLocation Location);
 
-	RenderablPassLocation AddRenderPassGroup(RenderPassGroup && PassesToAdd);
-	void RemoveRenderPassGroup(RenderablPassLocation Location);
+	RenderablePassLocation AddRenderPassGroup(RenderPassGroup && PassToAdd);
+	void RemoveRenderPassGroup(RenderablePassLocation Location);
 
-	bool LinkMeshMultiPass(RenderableMeshLocation Mesh, RenderablPassLocation Pass);
+	bool LinkMeshMultiPass(RenderableMeshLocation Mesh, RenderablePassLocation Pass);
 
 	inline void SetProjection(const glm::mat4 & Projection)
 	{
 		CurrentProjection = Projection;
+	}
+
+	inline void SetDepthEnabled(bool Enabled)
+	{
+		Renderer.EnableDepthTest(Enabled);
 	}
 
 	inline void SetView(const glm::mat4 & View)
@@ -53,10 +56,15 @@ public:
 		CurrentView = View;
 	}
 
+	inline void GetCurrentWindowInfo(WindowInfo & CurrentWindowInfo)
+	{
+		return Renderer.GetCurrentWindowInfo(CurrentWindowInfo);
+	}
+
 	size_t CreateFontRenderer(std::string FontName);
 
 	void DestroyFontRenderer(size_t FontRendererID);
-	
+
 	inline FontRenderer * GetFontRenderer(size_t FontRendererID)
 	{
 		std::map<std::size_t, FontRenderer>::iterator it = FontRenderers.find(FontRendererID);
@@ -65,18 +73,13 @@ public:
 		{
 			return nullptr;
 		}
-		
+
 		return &FontRenderers[FontRendererID];
 	}
 
 private:
-	std::vector<MeshStorageInfo> Meshes;
-	std::vector<RenderPassGroup> Passes;
 
 	GLRenderer & Renderer;
-
-	RenderableMeshLocation FirstRenderableMeshFree = 0;
-	RenderablPassLocation  FirstRenderPassFree = 0;
 
 	uint32_t UniformMatricesBufferID;
 	UniformMatrices UniformMatricesBuffer;
@@ -90,5 +93,8 @@ private:
 	Material BaseMaterial;
 
 	std::map<size_t, FontRenderer> FontRenderers;
+
+	std::list<MeshStorageInfo> MeshList;
+	std::list<RenderPassGroup> PassList;
 };
 

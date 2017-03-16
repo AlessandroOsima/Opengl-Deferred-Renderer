@@ -51,7 +51,7 @@ void Renderable::AddPassesOnMesh(RenderPassGroup && PassGroup)
 {
 	if (LogicScene)
 	{
-		RenderablPassLocation passLocation = LogicScene->GetRenderScene().AddRenderPassGroup(std::move(PassGroup));
+		RenderablePassLocation passLocation = LogicScene->GetRenderScene().AddRenderPassGroup(std::move(PassGroup));
 		LogicScene->GetRenderScene().LinkMeshMultiPass(Loc, passLocation);
 	}
 }
