@@ -96,16 +96,15 @@ bool FontRenderer::Init(const std::string & FontName, WindowInfo Info)
 	delete[] data;
 
 	bool Created = false;
-	bool Found = false;
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	Created = TextureManager::GetTextureManager().CreateTexture(FontName, GL_R8, BitMapWidth, BitMapHeight, FontTextureID);
-	Texture fontTexture = TextureManager::GetTextureManager().GetTextureFromID(FontTextureID, Found);
+	auto fontTexture = TextureManager::GetTextureManager().GetTextureFromID(FontTextureID);
 
-	if (Created && Found)
+	if (Created && fontTexture)
 	{
-		fontTexture.SetImageData(0, 0, 0, BitMapWidth, BitMapHeight, GL_RED, GL_UNSIGNED_BYTE, bitmap.get());
+		fontTexture->SetImageData(0, 0, 0, BitMapWidth, BitMapHeight, GL_RED, GL_UNSIGNED_BYTE, bitmap.get());
 	}
 	else
 	{
@@ -122,7 +121,7 @@ bool FontRenderer::Init(const std::string & FontName, WindowInfo Info)
 	if (ShaderManager::GetShaderManager().CreateShader("font", "font.vs", "font.fs", fontShader))
 	{
 
-		FontMaterial.DiffuseTexture = FontTextureID;
+		//FontMaterial.DiffuseTexture = FontTextureID;
 		FontMaterial.Program = fontShader;
 		FontMaterial.CreateObjects();
 	}
@@ -137,13 +136,9 @@ bool FontRenderer::Init(const std::string & FontName, WindowInfo Info)
 
 	glCreateBuffers(1, &UniformMatricesBufferID);
 
-	glm::mat4 model = glm::mat4(1);
-	//model = glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
-	//model = glm::translate(model, glm::vec3(Info.Width/2, Info.Height/2, 0));
-
 	glm::mat4 projection = glm::ortho((float)0, (float)Info.Width, (float)0, (float)Info.Height, 0.f, 1.f);
 
-	UniformMatricesBuffer = {projection, glm::mat4(1), model};
+	UniformMatricesBuffer = {projection, glm::mat4(1)};
 
 	glCheckFunction(glNamedBufferStorage(UniformMatricesBufferID, sizeof(UniformMatrices), &UniformMatricesBuffer, GL_DYNAMIC_STORAGE_BIT));
 
@@ -206,7 +201,9 @@ void FontRenderer::DeInit()
 
 std::unique_ptr<Mesh> FontRenderer::CreateMeshFromText(TextInfo Text)
 {
-	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+
+
+	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(std::make_shared<VertexData>());
 
 	stbtt_bakedchar* chars = (stbtt_bakedchar*)(AllocatedChars);
 	Index n = 0;
@@ -256,7 +253,10 @@ std::unique_ptr<Mesh> FontRenderer::CreateMeshFromText(TextInfo Text)
 		n += 4;
 	}
 
-	mesh->GenerateMeshData(Vertices, Indices);
+	mesh->GetIndices() = Indices;
+	mesh->GetVertices() = Vertices;
+	mesh->LinkVertexData();
+	mesh->LinkMaterialData();
 
 	return mesh;
 }

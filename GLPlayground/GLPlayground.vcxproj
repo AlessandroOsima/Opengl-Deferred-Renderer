@@ -19,11 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\GameObjects\Components\DisComponent.cpp" />
+    <ClCompile Include="Source\Renderer\MeshMaterialParameters.cpp" />
+    <ClCompile Include="Source\GameObjects\Objects\PointLightObject.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\PointLightComponent.cpp" />
+    <ClCompile Include="Source\Renderer\Sampler.cpp" />
+    <ClCompile Include="Source\Renderer\Lights\Lights.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\RenderableDebug.cpp" />
+    <ClCompile Include="Source\Renderer\PrimitiveDrawer.cpp" />
+    <ClCompile Include="Source\Renderer\RenderingInfo.cpp" />
+    <ClCompile Include="Source\Resources\Obj\ObjImporter.cpp" />
+    <ClCompile Include="Source\Managers\MeshManager.cpp" />
+    <ClCompile Include="Source\Renderer\VertexFactory.cpp" />
     <ClCompile Include="Source\Managers\InputManager.cpp" />
     <ClCompile Include="Source\Logger\Assert.cpp" />
     <ClCompile Include="Source\Renderer\FontRenderer.cpp" />
     <ClCompile Include="Source\Renderer\Material.cpp" />
-    <ClCompile Include="Source\Renderer\RenderPass.cpp" />
     <ClCompile Include="Source\Renderer\Framebuffer.cpp" />
     <ClCompile Include="Source\Math\Filters.cpp" />
     <ClCompile Include="Source\GameObjects\Component.cpp" />
@@ -48,17 +59,30 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Source\GameObjects\Components\Text.cpp" />
+    <ClCompile Include="Source\Renderer\VertexData.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\GameObjects\Components\DisComponent.h" />
+    <ClInclude Include="Source\Renderer\MeshMaterialParameters.h" />
+    <ClInclude Include="Source\GameObjects\Objects\PointLightObject.h" />
+    <ClInclude Include="Source\GameObjects\Components\PointLightComponent.h" />
+    <ClInclude Include="Source\Renderer\Sampler.h" />
+    <ClInclude Include="Source\Renderer\Lights\Lights.h" />
+    <ClInclude Include="Source\GameObjects\Components\RenderableDebug.h" />
+    <ClInclude Include="Source\Renderer\PrimitiveDrawer.h" />
+    <ClInclude Include="Source\Renderer\RenderingInfo.h" />
+    <ClInclude Include="Source\Resources\Obj\ObjImporter.h" />
+    <ClInclude Include="Source\Resources\Importer.h" />
     <ClInclude Include="Libs\stb\stb_image_write.h" />
     <ClInclude Include="Libs\stb\stb_truetype.h" />
+    <ClInclude Include="Source\Managers\MeshManager.h" />
+    <ClInclude Include="Source\Renderer\VertexFactory.h" />
     <ClInclude Include="Source\Input\Input.h" />
     <ClInclude Include="Source\Logger\Asserts.h" />
     <ClInclude Include="Source\Managers\InputManager.h" />
     <ClInclude Include="Source\Renderer\Font.h" />
     <ClInclude Include="Source\Renderer\FontRenderer.h" />
     <ClInclude Include="Source\Renderer\Material.h" />
-    <ClInclude Include="Source\Renderer\RenderPass.h" />
     <ClInclude Include="Source\Renderer\Framebuffer.h" />
     <ClInclude Include="Source\Math\Filters.h" />
     <ClInclude Include="Source\GameObjects\Component.h" />
@@ -84,6 +108,7 @@
     <ClInclude Include="Source\GameObjects\Objects\TexturedObject.h" />
     <ClInclude Include="Source\Managers\TextureManager.h" />
     <ClInclude Include="Source\GameObjects\Components\Text.h" />
+    <ClInclude Include="Source\Renderer\VertexData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
@@ -151,7 +176,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>E:\glew-2.0.0-win32\glew-2.0.0\lib\Release\x64;E:\glfw-3.2.1.bin.WIN64\glfw-3.2.1.bin.WIN64\lib-vc2015;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)\Libs\glew-2.0.0\lib\Release\x64;$(ProjectDir)\Libs\glfw-3.2.1.bin.WIN64\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -211,7 +236,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>E:\glew-2.0.0-win32\glew-2.0.0\include;E:\glfw-3.2.1.bin.WIN64\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Libs\stb;$(ProjectDir)\Libs\glm;$(ProjectDir)\Source;$(ProjectDir)\Libs\glew-2.0.0\include;$(ProjectDir)\Libs\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -52,9 +52,8 @@ bool ShaderProgram::BindBufferToUniform(uint32_t BufferID, uint32_t BindingLocat
 
 	if (shaderUniformID != GL_INVALID_INDEX)
 	{
-		glUniformBlockBinding(GetShaderProgramID(), shaderUniformID, BindingLocation);
-
-		glBindBufferBase(GL_UNIFORM_BUFFER, BindingLocation, BufferID);
+		glCheckFunction(glUniformBlockBinding(GetShaderProgramID(), shaderUniformID, BindingLocation));
+		glCheckFunction(glBindBufferBase(GL_UNIFORM_BUFFER, BindingLocation, BufferID));
 
 		return true;
 	}
@@ -65,7 +64,7 @@ bool ShaderProgram::BindBufferToUniform(uint32_t BufferID, uint32_t BindingLocat
 bool ShaderProgram::CompileShader(const std::string & ShaderFilename, ShaderType Type)
 {
 
-	std::fstream fileStream;
+	std::ifstream fileStream;
 
 	fileStream.open(ShaderFilename);
 
@@ -176,9 +175,14 @@ unsigned int ShaderProgram::GetUniformBufferBlockIndex(const std::string & Block
 	return glGetUniformBlockIndex(ProgramID, BlockName.c_str());
 }
 
-unsigned int ShaderProgram::GetUniformIndex(const std::string & UniformName)
+int ShaderProgram::GetUniformIndex(const std::string & UniformName) const
 {
 	return glGetUniformLocation(ProgramID, UniformName.c_str());
+}
+
+int ShaderProgram::GetResourceLocation(unsigned int ResourceType, const std::string & ResourceName) const
+{
+	return glGetProgramResourceLocation(ProgramID, ResourceType, ResourceName.c_str());
 }
 
 void ShaderProgram::SetUniformMatrix4(unsigned int Location, const glm::mat4 & Mat4Val)
@@ -205,4 +209,3 @@ void ShaderProgram::SetUniformFloat(unsigned int Location, float FloatVal)
 {
 	glUniform1f(Location, FloatVal);
 }
-

@@ -3,114 +3,89 @@
 #include "Managers/ShaderManager.h"
 #include "Managers/TextureManager.h"
 
-Mesh::Mesh(const std::vector<Vertex> & Vertices, const std::vector<Index> & Indices) 
+Mesh::Mesh(std::shared_ptr<VertexData> Data) : VData(Data), MaterialParameters(new EmptytMeshMaterialParameters())
 {
-	GenerateMeshData(Vertices, Indices);
+	LinkVertexData();
+	LinkMaterialData();
 }
 
-Mesh::Mesh(): VEO(0), VBO(0), VAO(0), Model(glm::mat4(1))
+//Mesh::Mesh(): Model(glm::mat4(1))
+//{
+//
+//}
+
+Mesh::Mesh(Mesh && MeshToReplace) : VData (std::move(MeshToReplace.VData))
 {
-
-}
-
-Mesh::Mesh(Mesh && MeshToReplace)
-{
-	Vertices = std::move(MeshToReplace.Vertices);
-	Indices = std::move(MeshToReplace.Indices);
-
 	Model = std::move(MeshToReplace.Model);
+	MaterialData = std::move(MeshToReplace.MaterialData);
+	MaterialParameters = std::move(MeshToReplace.MaterialParameters);
+}
 
-	VBO = MeshToReplace.VBO;
-	MeshToReplace.VBO = 0;
-
-	VEO = MeshToReplace.VEO;
-	MeshToReplace.VEO = 0;
-
-	VAO = MeshToReplace.VAO;
-	MeshToReplace.VAO = 0;
-
+Mesh::Mesh()
+{
+	LinkMaterialData();
 }
 
 Mesh & Mesh::operator=(Mesh && MeshToReplace)
 {
-	Vertices = std::move(MeshToReplace.Vertices);
-	Indices = std::move(MeshToReplace.Indices);
-
+	VData = std::move(MeshToReplace.VData);
 	Model = std::move(MeshToReplace.Model);
-
-	VBO = MeshToReplace.VBO;
-	MeshToReplace.VBO = 0;
-
-	VEO = MeshToReplace.VEO;
-	MeshToReplace.VEO = 0;
-
-	VAO = MeshToReplace.VAO;
-	MeshToReplace.VAO = 0;
+	MaterialData = std::move(MeshToReplace.MaterialData);
+	MaterialParameters = std::move(MeshToReplace.MaterialParameters);
 
 	return *this;
 }
 
 Mesh::~Mesh()
 {
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &VEO);
-
-	glDeleteVertexArrays(1, &VAO);
+	MaterialData.RemoveObjects();
 }
 
-void Mesh::GenerateMeshData(const std::vector<Vertex> & NewVertices, const std::vector<Index> & NewIndices)
+void Mesh::LinkVertexData()
 {
-	Vertices = NewVertices;
-	Indices = NewIndices;
+	VData->GenerateVertexData();
+}
 
-	glCreateBuffers(1, &VEO);
-	glNamedBufferStorage(VEO, sizeof(Index) * Indices.size(), Indices.data(), GL_DYNAMIC_STORAGE_BIT);
-
-
-	glCreateBuffers(1, &VBO);
-	glNamedBufferStorage(VBO, sizeof(Vertex) * Vertices.size(), Vertices.data(), GL_DYNAMIC_STORAGE_BIT);
-
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VEO);
-	
-	//Position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-
-	//Color
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(sizeof(glm::vec3)));
-	glEnableVertexAttribArray(1);
-
-	//UV
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)((sizeof(glm::vec3)) + sizeof(glm::vec4)));
-	glEnableVertexAttribArray(2);
-
-	glBindVertexArray(0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
+void Mesh::LinkMaterialData()
+{
+	MaterialData.CreateObjects();
+	MaterialParameters->LinkParameters(this);
 }
 
 void Mesh::Bind()
 {
-	glBindVertexArray(VAO);
+	VData->Bind();
+
+	MaterialData.Bind();
+	MaterialParameters->BindParameters(this);
+	MaterialData.SetUniforms();
+
 }
 
 void Mesh::Unbind()
 {
-	glBindVertexArray(0);
+	VData->Unbind();
+	MaterialParameters->UnbindParameters(this);
+	MaterialData.UnBind();
+}
+
+bool Mesh::SetMaterialParameters(std::unique_ptr<BaseMeshMaterialParameters> && NewMaterialParameters)
+{
+	if (NewMaterialParameters->IsValidForMaterial(MaterialData))
+	{
+		MaterialParameters = std::move(NewMaterialParameters);
+		return true;
+	}
+
+	return false;
 }
 
 void Mesh::UpdateVertexData()
 {
-	glNamedBufferSubData(VBO, 0, Vertices.size() * sizeof(Vertex), Vertices.data());
+	VData->UpdateVertexData();
 }
 
 void Mesh::UpdateIndexData()
 {
-	glNamedBufferSubData(VEO, 0, Indices.size() * sizeof(Index), Indices.data());
+	VData->UpdateIndexData();
 }

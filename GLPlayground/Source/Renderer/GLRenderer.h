@@ -19,7 +19,8 @@ public:
 	void Clear();
 	void Present();
 	void DrawMesh(Mesh & mesh);
-	void Draw();
+	
+	void EnableDepthTest(bool Enable);
 
 	~GLRenderer();
 
@@ -28,9 +29,12 @@ public:
 		glfwGetWindowSize(Context, &info.Width, &info.Height);
 	}
 
+	void SetClearColor(const glm::vec4 & Color);
+
 
 private:
 	GLFWwindow * Context;
-
+	glm::vec4 ClearColor = glm::vec4(0,0,0,0);
+	bool DepthTestEnabled = false;
 };
 

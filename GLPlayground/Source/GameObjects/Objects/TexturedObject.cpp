@@ -11,9 +11,17 @@
 #include "GameObjects/Objects/TexturedObject.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "GameObjects/Components/Text.h"
-
+#include "Renderer/VertexFactory.h"
+#include "Managers/MeshManager.h"
+#include "GameObjects/Components/RenderableDebug.h"
+#include "GameObjects/Components/DisComponent.h"
 
 TexturedObject::TexturedObject()
+{
+
+}
+
+TexturedObject::TexturedObject(const std::string & Filename) : LoadFromFile(true), Filename(Filename)
 {
 
 }
@@ -22,35 +30,28 @@ void TexturedObject::Start()
 {
 
 	Object::Start();
-	//
 
-	std::shared_ptr<Mesh> mesh(new Mesh(
-	{  //Vertices
-		{ glm::vec3(1.f, 1.f, -0.1f), glm::vec4(0, 0, 1, 1), glm::vec2(1,1) }, //0
-		{ glm::vec3(1.f,  -1.f, -0.1f), glm::vec4(0, 1, 0, 1), glm::vec2(1,0) },  //1
-		{ glm::vec3(-1.f, 1.f, -0.1f), glm::vec4(1, 0, 0, 1), glm::vec2(0,1) }, //2
-		{ glm::vec3(-1.f,   -1.f, -0.1f), glm::vec4(0, 0, 1, 1), glm::vec2(0,0) }  //3
-	},
-		//Indices
+	Renderable* rend = AddComponent<Renderable>(std::make_unique<Renderable>());
+	//AddComponent<DisComponent>(std::make_unique<DisComponent>());
+
+	//AddComponent(std::make_unique<RenderableDebug>());
+
+
+	if (LoadFromFile)
 	{
-		0,
-		1,
-		2,
-		2,
-		1,
-		3
+		std::string txStr = ResourceManager::GetMeshesFolder();
+		auto mesh = MeshManager::GetMeshManager().CreateFromFile(txStr += Filename);
+		rend->SetMesh(mesh);
 	}
-	));
-	//
+	else
+	{
+		auto mesh = VertexFactory::GenerateCube();
+		rend->SetMesh(mesh);
+	}
 
-	ComponentLocation rendLoc = AddComponent(std::make_unique<Renderable>());
+	AddComponent<Transform>(std::make_unique<Transform>());
 
-	Renderable* rend = (Renderable *)GetComponentAtLocation(rendLoc);
-	rend->SetMesh(mesh);
-
-	ComponentLocation transfLoc = AddComponent(std::make_unique<Transform>());
-
-	AddComponent(std::make_unique<Text>());
+	AddComponent<Text>(std::make_unique<Text>());
 }
 
 void TexturedObject::Update(float DeltaTime)

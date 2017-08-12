@@ -30,13 +30,15 @@ public:
 	void UseProgram();
 
 	unsigned int GetUniformBufferBlockIndex(const std::string & BlockName);
-	unsigned int GetUniformIndex(const std::string & UniformName);
+	int GetUniformIndex(const std::string & UniformName) const;
+	int GetResourceLocation(unsigned int ResourceType, const std::string & ResourceName) const;
 
 	void SetUniformMatrix4(unsigned int Location,  const glm::mat4 & Mat4Val);
 	void SetUniformMatrix3(unsigned int Location, const glm::mat3 & Mat3Val);
 	void SetUniformVector4(unsigned int Location, const glm::vec4 & Vec4Val);
 	void SetUniformVector3(unsigned int Location, const glm::vec3 & Vec3Val);
 	void SetUniformFloat(unsigned int Location, float FloatVal);
+
 
 private:
 	GLuint VertexShaderID;

@@ -4,7 +4,7 @@
 #include <memory>
 #include "Renderer/RenderableScene.h"
 #include "GameObjects/Scene.h"
-#include "Renderer/RenderPass.h"
+#include "Renderer/RenderingInfo.h"
 
 class Scene;
 
@@ -48,11 +48,14 @@ public:
 		MeshIsRendering = true;
 	}
 
-	void AddPassesOnMesh(RenderPassGroup && PassGroup);
-
 	inline bool HasMesh()
 	{
 		return Mesh != nullptr;
+	}
+
+	inline bool IsRendering()
+	{
+		return MeshIsRendering;
 	}
 
 

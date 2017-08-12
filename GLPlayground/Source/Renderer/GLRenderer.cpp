@@ -48,14 +48,16 @@ bool GLRenderer::Initialize(GLFWwindow * Window)
 	glfwGetFramebufferSize(Context, &width, &height);
 	glViewport(0, 0, width, height);
 
+	//glPointSize(500.f);
+
 	return true;
 
 }
 
 void GLRenderer::Clear()
 {
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, ClearColor.w);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void GLRenderer::Present()
@@ -68,15 +70,17 @@ void GLRenderer::DrawMesh(Mesh & mesh)
 	glDrawElements(GL_TRIANGLES, (GLsizei)mesh.GetIndices().size(), GL_UNSIGNED_INT, 0);
 }
 
-void GLRenderer::Draw()
+void GLRenderer::EnableDepthTest(bool Enable)
 {
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-
-	glfwSwapBuffers(Context);
+	DepthTestEnabled = Enable;
+	Enable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
 GLRenderer::~GLRenderer()
 {
+}
+
+void GLRenderer::SetClearColor(const glm::vec4 & Color)
+{
+	ClearColor = Color;
 }

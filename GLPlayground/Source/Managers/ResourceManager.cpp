@@ -15,3 +15,6 @@ const std::string ResourceManager::Shaders = "Content/Shaders/";
 const std::string ResourceManager::Textures = "Content/Textures/";
 
 const std::string ResourceManager::Fonts = "Content/Fonts/";
+
+const std::string ResourceManager::Meshes = "Content/Meshes/";
+

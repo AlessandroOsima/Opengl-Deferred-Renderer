@@ -2,11 +2,13 @@
 #include "RenderableScene.h"
 #include "Managers/ShaderManager.h"
 #include "Managers/TextureManager.h"
+#include "Managers/MeshManager.h"
 #include <limits>
 #include "GLUtilities.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <cstring>
 
-RenderableScene::RenderableScene(GLRenderer & Renderer) : Renderer(Renderer), BaseMaterial(0,0)
+RenderableScene::RenderableScene(GLRenderer & Renderer) : Renderer(Renderer), BaseMaterial()
 {
 }
 
@@ -17,18 +19,43 @@ RenderableScene::~RenderableScene()
 
 void RenderableScene::Initialize()
 {
+	Renderer.SetClearColor({0,0,0,1});
 	glCreateBuffers(1, &UniformMatricesBufferID);
 	glNamedBufferStorage(UniformMatricesBufferID, sizeof(UniformMatricesBuffer), &UniformMatricesBuffer, GL_DYNAMIC_STORAGE_BIT);
+
+	std::memset(&Lights, 0, sizeof(Lights));
+
+	glCreateBuffers(1, &UniformLightsBufferID);
+	glNamedBufferStorage(UniformLightsBufferID, sizeof(Lights), &Lights, GL_DYNAMIC_STORAGE_BIT);
+
+	Lights.Ambient = glm::vec4(0.05f, 0.05f, 0.05f, 1);
+
+	/*Lights.DirectionalLights[0].Direction = glm::vec4(0.f, 0.f, -1.f, 0);
+	Lights.DirectionalLights[0].Direction = glm::normalize(Lights.DirectionalLights[0].Direction);
+	Lights.DirectionalLights[0].SetEnabled(true);
+	Lights.DirectionalLights[0].Color = glm::vec4(1, 1.f, 0.8f, 1);*/
+
+	/*Lights.PointLights[0].Position = glm::vec4(0.f, 0.f, 0.f, 0);
+	Lights.PointLights[0].SetEnabled(true);
+	Lights.PointLights[0].Color = glm::vec4(1, 1.f, 0.8f, 1);*/
+
+	/*Lights.DirectionalLights[1].Direction = glm::vec4(-1, 0, 0, 1);
+	Lights.DirectionalLights[1].SetEnabled(true);
+	Lights.DirectionalLights[1].Color = glm::vec4(1, 0, 0, 1);*/
+	
 
 	WindowInfo info;
 	Renderer.GetCurrentWindowInfo(info);
 
-	CurrentProjection = glm::ortho((float)0, (float)info.Width, (float)0, (float)info.Height, 0.f, 1.f);
+	UniformMatricesBuffer.Projection = glm::ortho((float)0, (float)info.Width, (float)0, (float)info.Height, 0.f, 100.f);
 
 	ShaderManager::GetShaderManager().OnShaderAdded = [&](size_t HashedProgram)
 	{
 		constexpr unsigned int MatricesBindingLocation = 0;
 		constexpr char * MatricesUniformName = "Matrices";
+
+		constexpr unsigned int LightsBindingLocation = 2;
+		constexpr char * LightsUniformName = "lights";
 
 		bool found = false;
 		ShaderProgram & program = ShaderManager::GetShaderManager().GetShader(HashedProgram, found);
@@ -36,17 +63,21 @@ void RenderableScene::Initialize()
 		if (found)
 		{
 			program.BindBufferToUniform(UniformMatricesBufferID, MatricesBindingLocation, MatricesUniformName);
+
+			program.BindBufferToUniform(UniformLightsBufferID, LightsBindingLocation, LightsUniformName);
 		}
 
-		glNamedBufferSubData(UniformMatricesBufferID, 0, sizeof(glm::mat4), &CurrentProjection);
+		glNamedBufferSubData(UniformMatricesBufferID, 0, sizeof(glm::mat4), &UniformMatricesBuffer.Projection);
 
-		glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4), sizeof(glm::mat4), &CurrentView);
+		glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4), sizeof(glm::mat4), &UniformMatricesBuffer.View);
+
+		//glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4), sizeof(glm::mat4), &UniformMatricesBuffer.View);
 	};
 
 	size_t baseShaderHash;
 	if (ShaderManager::GetShaderManager().CreateShader("base", "base.vs", "base.fs", baseShaderHash))
 	{
-		BaseMaterial = { 0, baseShaderHash };
+		BaseMaterial.Program = baseShaderHash;
 		BaseMaterial.CreateObjects();
 	}
 	else
@@ -54,9 +85,42 @@ void RenderableScene::Initialize()
 		Logger::GetLogger().LogString("Unable to create base material for Renderable Scene", LogType::ERROR);
 	}
 
-	glEnable(GL_BLEND);
+	//glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	SetDepthEnabled(true);
+
+	Drawer.Init();
+
+	Position.GenerateTextureWithSize(info.Width, info.Height, GL_RGBA16F);
+	Normals.GenerateTextureWithSize(info.Width, info.Height, GL_RGBA16F);
+	Diffuse.GenerateTextureWithSize(info.Width, info.Height, GL_RGBA16F);
+	Specular.GenerateTextureWithSize(info.Width, info.Height, GL_RGBA16F);
+	Ambient.GenerateTextureWithSize(info.Width, info.Height, GL_RGBA16F);
+	Depth.GenerateTextureWithSize(info.Width, info.Height, GL_DEPTH24_STENCIL8);
+
+	GBuffer.BindTextureToFramebuffer(Position, GL_COLOR_ATTACHMENT0, 0);
+	GBuffer.BindTextureToFramebuffer(Normals, GL_COLOR_ATTACHMENT1, 0);
+	GBuffer.BindTextureToFramebuffer(Diffuse, GL_COLOR_ATTACHMENT2, 0);
+	GBuffer.BindTextureToFramebuffer(Specular, GL_COLOR_ATTACHMENT3, 0);
+	GBuffer.BindTextureToFramebuffer(Ambient, GL_COLOR_ATTACHMENT4, 0);
+
+	GBuffer.BindTextureToFramebuffer(Depth, GL_DEPTH_ATTACHMENT, 0);
+
+	FullscreenLightpassQuad = MeshManager::GetMeshManager().CreateFullScreenQuad();
+
+	size_t deferredLightpassMaterialID = -1;
+	if (ShaderManager::GetShaderManager().CreateShader("deferredLightingLightpass", "deferredLightingLightpass.vs", "deferredLightingLightpass.fs", deferredLightpassMaterialID))
+	{
+		Material DeferredLightpassMaterial;
+		DeferredLightpassMaterial.Program = deferredLightpassMaterialID;
+		//DeferredLightpassMaterial.CreateObjects();
+		FullscreenLightpassQuad->SetMaterial(std::move(DeferredLightpassMaterial));
+	}
+	else
+	{
+		Logger::GetLogger().LogString("Unable to create deferredLightingLightpass shader", LogType::ERROR);
+	}
 }
 
 void RenderableScene::RenderScene(float DeltaTime)
@@ -65,121 +129,86 @@ void RenderableScene::RenderScene(float DeltaTime)
 	WindowInfo info;
 	Renderer.GetCurrentWindowInfo(info);
 
-	Renderer.Clear();
+	GBuffer.BindFramebuffer(FramebufferBindType::DRAW);
+	
+#ifdef _DEBUG
 
-
-	for (auto & mesh : Meshes)
+	if (!GBuffer.IsComplete())
 	{
-		//Render with only one pass
-		if (mesh.Location == InvalidRenderpassIndex)
-		{
-			Logger::GetLogger().LogString("mesh does not have a valid renderpass", LogType::ERROR);
-		}
-		else
-		{
-
-			RenderPassGroup & group = Passes[mesh.Location];
-			
-			bool found;
-
-			Texture & colorTarget = TextureManager::GetTextureManager().GetTextureFromID(group.GetOffscreenTexture(), found);
-			Texture & textureAttachment = TextureManager::GetTextureManager().GetTextureFromID(group.GetAttachmentTexture(), found);
-
-			size_t attachmentTexture = group.RenderPasses[0].GetMaterial().DiffuseTexture;
-			size_t original;
-
-			//Do all the addictive passes
-			for (int i = 0; i < group.RenderPasses.size(); i++)
-			{
-				//The viewport is the size of the texture we are rendering
-				glViewport(0, 0, colorTarget.GetTextureInfo().Width, colorTarget.GetTextureInfo().Height);
-
-				//Bind the attachment texture to the framebuffer as a color target
-				OffscreenFramebuffer.BindTextureToFramebuffer(colorTarget, FrameBufferAttachmentType::COLOR);
-				OffscreenFramebuffer.BindFramebuffer(FramebufferBindType::FRAMEBUFFER);
-
-				//Setup the shaders for the current RenderPass
-				Renderer.Clear();
-
-				mesh.Mesh->Bind();
-
-				if (group.RenderPasses[i].UsePreviousPassAsAttachment)
-				{
-					original = group.RenderPasses[i].GetMaterial().DiffuseTexture;
-					group.RenderPasses[i].GetMaterial().DiffuseTexture = attachmentTexture;
-				}
-
-				group.RenderPasses[i].GetMaterial().Bind();
-				group.RenderPasses[i].BindUniforms();
-
-				bool ShaderFound;
-
-				ShaderProgram & program = ShaderManager::GetShaderManager().GetShader(group.RenderPasses[i].GetMaterial().Program, ShaderFound);
-			
-				AssertWithMessage(ShaderFound, "Unable to find shader");
-
-				constexpr unsigned int MatricesBindingLocation = 0;
-				constexpr char * MatricesUniformName = "Matrices";
-				program.BindBufferToUniform(UniformMatricesBufferID, MatricesBindingLocation, MatricesUniformName);
-
-				//When we render to an offscreen texture the model, view and projection matrices are all identity matrices because there is no need for transformations
-				glNamedBufferSubData(UniformMatricesBufferID, 0, sizeof(glm::mat4), &glm::mat4(1));
-				glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4), sizeof(glm::mat4), &glm::mat4(1));
-				glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &glm::mat4(1));
-
-				Renderer.DrawMesh(*mesh.Mesh);
-
-				group.RenderPasses[i].GetMaterial().UnBind();
-				mesh.Mesh->Unbind();
-
-				if (group.RenderPasses[i].UsePreviousPassAsAttachment)
-				{
-					//Copy the framebuffer color target to another texture to use as input for the fragment shader in the RenderPass
-					glBindTexture(GL_TEXTURE_2D, textureAttachment.GetID());
-					glCheckFunction(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, colorTarget.GetTextureInfo().Width, colorTarget.GetTextureInfo().Height));
-					glBindTexture(GL_TEXTURE_2D, 0);
-
-					group.RenderPasses[i].GetMaterial().DiffuseTexture = original;
-					attachmentTexture = group.GetAttachmentTexture();
-				}
-
-				if (group.RenderPasses[i].RenderOnMainFramebuffer)
-				{
-					//Render the mesh in the main framebuffer
-					OffscreenFramebuffer.UnbindFramebufferAttachment(FrameBufferAttachmentType::COLOR);
-					OffscreenFramebuffer.UnBindFramebuffer();
-
-					glViewport(0, 0, info.Width, info.Height);
-
-					mesh.Mesh->Bind();
-
-					BaseMaterial.DiffuseTexture = attachmentTexture;
-					BaseMaterial.Bind();
-					
-					//Since we are rendering on the main window we need to use the correct matrices
-					glNamedBufferSubData(UniformMatricesBufferID, 0, sizeof(glm::mat4), &CurrentProjection);
-					glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4), sizeof(glm::mat4), &CurrentView);
-					glNamedBufferSubData(UniformMatricesBufferID, sizeof(glm::mat4) * 2, sizeof(glm::mat4), &mesh.Mesh->GetModel());
-
-					Renderer.DrawMesh(*mesh.Mesh);
-
-					BaseMaterial.UnBind();
-					mesh.Mesh->Unbind();
-				
-				}
-			}
-
-			OffscreenFramebuffer.UnbindFramebufferAttachment(FrameBufferAttachmentType::COLOR);
-			OffscreenFramebuffer.UnBindFramebuffer();
-		}
+		Logger::GetLogger().LogString("GBuffer is not complete", LogType::ERROR);
 	}
 
-	OffscreenFramebuffer.UnbindFramebufferAttachment(FrameBufferAttachmentType::COLOR);
-	OffscreenFramebuffer.UnBindFramebuffer();
+#endif
 
-	//Restore the viewport and render all the TextRenderers
+	GLenum targets[5] = { GL_COLOR_ATTACHMENT0 , GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, targets);
+	
+	Renderer.Clear();
+
 	glViewport(0, 0, info.Width, info.Height);
 
+
+	//geometry pass
+
+	//Since we are rendering on the main window we need to use the correct matrices
+	glNamedBufferSubData(UniformMatricesBufferID, 0, sizeof(UniformMatricesBuffer), &UniformMatricesBuffer);
+
+	glNamedBufferSubData(UniformLightsBufferID, 0, sizeof(Lights), &Lights);
+
+	for (auto & mesh : MeshList)
+	{
+
+		mesh.Mesh->Bind();
+
+		Renderer.DrawMesh(*mesh.Mesh);
+
+		mesh.Mesh->Unbind();
+
+	}
+
+	GBuffer.UnBindFramebuffer();
+	
+	//Lightpass
+
+	Renderer.Clear();
+	
+
+	Position.Bind(0);
+	PositionSampler.Bind(0);
+	Normals.Bind(1);
+	NormalsSampler.Bind(1);
+	Diffuse.Bind(2);
+	DiffuseSampler.Bind(2);
+	Specular.Bind(3);
+	SpecularSampler.Bind(3);
+	Ambient.Bind(4);
+	AmbientSampler.Bind(4);
+	
+	UniformTypeData cameraPosition;
+	cameraPosition.vec3Val = glm::vec3(0,0,0);
+	FullscreenLightpassQuad->GetMaterial().AddUniform({ "pv", cameraPosition, UniformType::Vec3 });
+	FullscreenLightpassQuad->Bind();
+
+	Renderer.DrawMesh(*FullscreenLightpassQuad);
+
+	Position.UnBind();
+	PositionSampler.UnBind();
+	Normals.UnBind();
+	NormalsSampler.UnBind();
+	Diffuse.UnBind();
+	DiffuseSampler.UnBind();
+	Specular.UnBind();
+	SpecularSampler.UnBind();
+	Ambient.UnBind();
+	AmbientSampler.UnBind();
+
+
+
+	FullscreenLightpassQuad->Unbind();
+
+	
+	
+	Drawer.Render();
 
 	for (auto & fontRenderer : FontRenderers)
 	{
@@ -197,91 +226,22 @@ void RenderableScene::DeInitialize()
 	}
 
 	BaseMaterial.RemoveObjects();
+
+	Drawer.DeInit();
 }
 
 RenderableMeshLocation RenderableScene::AddMesh(std::shared_ptr<Mesh> MeshToAdd)
 {
 	MeshStorageInfo info;  
 	info.Mesh = MeshToAdd;
-	info.Location = InvalidRenderpassIndex;
 
-	if (FirstRenderableMeshFree >= Meshes.size())
-	{
-		Meshes.push_back(info);
-	}
-	else
-	{
-		Meshes[FirstRenderableMeshFree] = info;
-	}
-	
-	FirstRenderableMeshFree = Meshes.size();
-	return FirstRenderableMeshFree - 1;
-}
-
-RenderableMeshLocation RenderableScene::AddMeshMultipass(std::shared_ptr<Mesh> MeshToAdd, RenderPassGroup && PassesToAdd)
-{
-	RenderablPassLocation passLoc = AddRenderPassGroup(std::move(PassesToAdd));
-	RenderableMeshLocation meshLoc = AddMesh(MeshToAdd);
-	
-	LinkMeshMultiPass(meshLoc, passLoc);
-
-	return meshLoc;
+	MeshList.push_back(info);
+	return --MeshList.end();
 }
 
 void RenderableScene::RemoveMesh(RenderableMeshLocation Location)
 {
-	if (Location >= Meshes.size())
-	{
-		return;
-	}
-
-	FirstRenderableMeshFree = Location;
-	Meshes.erase(Meshes.begin() + Location);
-}
-
-
-RenderablPassLocation RenderableScene::AddRenderPassGroup(RenderPassGroup && PassesToAdd)
-{
-	if (FirstRenderPassFree >= Passes.size())
-	{
-		Passes.push_back(std::move(PassesToAdd));
-		Passes[Passes.size() - 1].Init();
-	}
-	else
-	{
-		Passes[FirstRenderPassFree] = std::move(PassesToAdd);
-		Passes[FirstRenderPassFree].Init();
-	}
-
-	
-
-	FirstRenderPassFree = Passes.size();
-	return FirstRenderPassFree - 1;
-}
-
-void RenderableScene::RemoveRenderPassGroup(RenderablPassLocation Location)
-{
-	if (Location >= Passes.size())
-	{
-		return;
-	}
-
-	FirstRenderPassFree = Location;
-	Passes[Location].DeInit();
-
-	Passes.erase(Passes.begin() + Location);
-}
-
-bool RenderableScene::LinkMeshMultiPass(RenderableMeshLocation Mesh, RenderablPassLocation Pass)
-{
-	if (Mesh >= Meshes.size() && Pass >= Passes.size())
-	{
-		return false;
-	}
-
-	Meshes[Mesh].Location = Pass;
-
-	return true;
+	MeshList.erase(Location);
 }
 
 size_t RenderableScene::CreateFontRenderer(std::string FontName)

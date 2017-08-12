@@ -23,9 +23,14 @@ public:
 		return Fonts;
 	}
 
+	static const std::string & GetMeshesFolder()
+	{
+		return Meshes;
+	}
+
 private:
 	static const std::string Shaders;
 	static const std::string Textures;
 	static const std::string Fonts;
+	static const std::string Meshes;
 };
-

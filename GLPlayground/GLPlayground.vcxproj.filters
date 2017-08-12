@@ -1,204 +1,93 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="Source\Managers\InputManager.cpp" />
+    <ClCompile Include="Source\Logger\Assert.cpp" />
+    <ClCompile Include="Source\Renderer\FontRenderer.cpp" />
+    <ClCompile Include="Source\Renderer\Material.cpp" />
+    <ClCompile Include="Source\Renderer\Framebuffer.cpp" />
+    <ClCompile Include="Source\Math\Filters.cpp" />
+    <ClCompile Include="Source\GameObjects\Component.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\Renderable.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\Transform.cpp" />
+    <ClCompile Include="Source\GameObjects\Object.cpp" />
+    <ClCompile Include="Source\GameObjects\Scene.cpp" />
+    <ClCompile Include="Source\Logger\Logger.cpp" />
+    <ClCompile Include="Source\Managers\ResourceManager.cpp" />
+    <ClCompile Include="Source\Managers\ShaderManager.cpp" />
+    <ClCompile Include="Source\Math\MathTypes.cpp" />
+    <ClCompile Include="Source\Renderer\GLRenderer.cpp" />
+    <ClCompile Include="Source\Renderer\Mesh.cpp" />
+    <ClCompile Include="Source\Renderer\RenderableScene.cpp" />
+    <ClCompile Include="Source\Renderer\ShaderProgram.cpp" />
+    <ClCompile Include="Source\Renderer\Texture.cpp" />
+    <ClCompile Include="Source\GLPlayground.cpp" />
+    <ClCompile Include="Source\GameObjects\Objects\TexturedObject.cpp" />
+    <ClCompile Include="Source\Managers\TextureManager.cpp" />
+    <ClCompile Include="Source\stdafx.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\Text.cpp" />
+    <ClCompile Include="Source\Renderer\VertexFactory.cpp" />
+    <ClCompile Include="Source\Renderer\VertexData.cpp" />
+    <ClCompile Include="Source\Managers\MeshManager.cpp" />
+    <ClCompile Include="Source\Resources\Obj\ObjImporter.cpp" />
+    <ClCompile Include="Source\Renderer\RenderingInfo.cpp" />
+    <ClCompile Include="Source\Renderer\PrimitiveDrawer.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\RenderableDebug.cpp" />
+    <ClCompile Include="Source\Renderer\Lights\Lights.cpp" />
+    <ClCompile Include="Source\Renderer\Sampler.cpp" />
+    <ClCompile Include="Source\GameObjects\Objects\PointLightObject.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\PointLightComponent.cpp" />
+    <ClCompile Include="Source\Renderer\MeshMaterialParameters.cpp" />
+    <ClCompile Include="Source\GameObjects\Components\DisComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\GLPlayground.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\GLRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\RenderableScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\ShaderProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Math\MathTypes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Managers\ResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Managers\ShaderManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Logger\Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameObjects\Components\Renderable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameObjects\Components\Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameObjects\Component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameObjects\Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameObjects\Object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Managers\TextureManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Math\Filters.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\Framebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\RenderPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\Material.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Logger\Assert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\FontRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameObjects\Components\Text.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-<<<<<<< Updated upstream
-    <ClCompile Include="Source\Managers\InputManager.cpp">
-=======
-    <ClCompile Include="Source\GameObjects\Objects\TexturedObject.cpp">
->>>>>>> Stashed changes
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Source\stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\stb\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\GLRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\GLUtilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\RenderableScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\ShaderProgram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Math\MathTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Managers\ResourceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Managers\ShaderManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Logger\Logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameObject\Components\Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameObjects\Components\Renderable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameObjects\Components\Transform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameObjects\Component.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameObjects\Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameObjects\Object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Managers\TextureManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Math\Filters.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Framebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\RenderPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Material.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Uniform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\stb\stb_image_write.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Libs\stb\stb_truetype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Logger\Asserts.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\FontRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameObjects\Components\Text.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\Font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-<<<<<<< Updated upstream
-    <ClInclude Include="Source\Managers\InputManager.h">
-=======
-    <ClInclude Include="Source\GameObjects\Objects\TexturedObject.h">
->>>>>>> Stashed changes
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Input\Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="Libs\stb\stb_image_write.h" />
+    <ClInclude Include="Libs\stb\stb_truetype.h" />
+    <ClInclude Include="Source\Input\Input.h" />
+    <ClInclude Include="Source\Logger\Asserts.h" />
+    <ClInclude Include="Source\Managers\InputManager.h" />
+    <ClInclude Include="Source\Renderer\Font.h" />
+    <ClInclude Include="Source\Renderer\FontRenderer.h" />
+    <ClInclude Include="Source\Renderer\Material.h" />
+    <ClInclude Include="Source\Renderer\Framebuffer.h" />
+    <ClInclude Include="Source\Math\Filters.h" />
+    <ClInclude Include="Source\GameObjects\Component.h" />
+    <ClInclude Include="Source\GameObjects\Components\Renderable.h" />
+    <ClInclude Include="Source\GameObject\Components\Scene.h" />
+    <ClInclude Include="Source\GameObjects\Components\Transform.h" />
+    <ClInclude Include="Source\GameObjects\Object.h" />
+    <ClInclude Include="Source\GameObjects\Scene.h" />
+    <ClInclude Include="Source\Logger\Logger.h" />
+    <ClInclude Include="Source\Managers\ResourceManager.h" />
+    <ClInclude Include="Source\Managers\ShaderManager.h" />
+    <ClInclude Include="Source\Math\MathTypes.h" />
+    <ClInclude Include="Source\Renderer\GLRenderer.h" />
+    <ClInclude Include="Source\Renderer\GLUtilities.h" />
+    <ClInclude Include="Source\Renderer\Mesh.h" />
+    <ClInclude Include="Source\Renderer\RenderableScene.h" />
+    <ClInclude Include="Source\Renderer\ShaderProgram.h" />
+    <ClInclude Include="Source\Renderer\Texture.h" />
+    <ClInclude Include="Libs\stb\stb_image.h" />
+    <ClInclude Include="Source\Renderer\Uniform.h" />
+    <ClInclude Include="Source\stdafx.h" />
+    <ClInclude Include="Source\targetver.h" />
+    <ClInclude Include="Source\GameObjects\Objects\TexturedObject.h" />
+    <ClInclude Include="Source\Managers\TextureManager.h" />
+    <ClInclude Include="Source\GameObjects\Components\Text.h" />
+    <ClInclude Include="Source\Renderer\VertexFactory.h" />
+    <ClInclude Include="Source\Renderer\VertexData.h" />
+    <ClInclude Include="Source\Managers\MeshManager.h" />
+    <ClInclude Include="Source\Resources\Importer.h" />
+    <ClInclude Include="Source\Resources\Obj\ObjImporter.h" />
+    <ClInclude Include="Source\Renderer\RenderingInfo.h" />
+    <ClInclude Include="Source\Renderer\PrimitiveDrawer.h" />
+    <ClInclude Include="Source\GameObjects\Components\RenderableDebug.h" />
+    <ClInclude Include="Source\Renderer\Lights\Lights.h" />
+    <ClInclude Include="Source\Renderer\Sampler.h" />
+    <ClInclude Include="Source\GameObjects\Objects\PointLightObject.h" />
+    <ClInclude Include="Source\GameObjects\Components\PointLightComponent.h" />
+    <ClInclude Include="Source\Renderer\MeshMaterialParameters.h" />
+    <ClInclude Include="Source\GameObjects\Components\DisComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />

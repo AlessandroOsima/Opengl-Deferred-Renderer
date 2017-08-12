@@ -18,6 +18,12 @@
 #include "GameObjects/Scene.h"
 #include "Managers/InputManager.h"
 
+void GLFWErrorCallback(int ErrorCode, const char * Description)
+{
+	std::stringstream stream;
+	stream << "GLFW error with code " << ErrorCode << " and description " << Description << std::ends;
+	Logger::GetLogger().LogString(stream.str(), LogType::ERROR);
+}
 
 GLFWwindow * CreateWindow(const WindowInfo & Window, const std::string & WindowTitle)
 {
@@ -42,14 +48,17 @@ int main()
 	GLRenderer renderer;
 	InputManager & InputManagerInstance = InputManager::GetInputManager();
 
+	glfwSetErrorCallback(GLFWErrorCallback);
+
 	if (glfwInit() == GL_FALSE)
 	{
 		return -1;
 	}
 
 
-	WindowInfo windowInfo{ 1340, 880 };
-	GLFWwindow * window = CreateWindow(windowInfo, "OpenGL Renderer - Filtering");
+	//WindowInfo windowInfo{ 1340, 880 };
+	WindowInfo windowInfo{ 1680, 1050 };
+	GLFWwindow * window = CreateWindow(windowInfo, "OpenGL Renderer - Blinn Phong");
 
 	if (!window)
 	{

@@ -5,7 +5,10 @@ enum class ComponentsType : int
 	Base,
 	Transform,
 	Renderable,
-	Text
+	Text,
+	RenderableDebug,
+	Light,
+	DisComponent,
 };
 
 class Object;

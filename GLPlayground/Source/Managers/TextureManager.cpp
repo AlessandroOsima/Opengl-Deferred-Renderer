@@ -20,18 +20,17 @@ bool TextureManager::CreateTextureFromFile(const std::string & TextureName, size
 {
 	bool alreadyCreated = false;
 
-	GetTextureAndIDFromName(TextureName, alreadyCreated, TextureID);
+	GetTextureAndIDFromName(TextureName, TextureID);
 
 	if (alreadyCreated)
 	{
 		return true;
 	}
 
-
-	Texture texture;
+	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 
 	std::string txStr = ResourceManager::GetTexturesFolder();
-	if (!texture.LoadFromFile(txStr += TextureName))
+	if (!texture->LoadFromFile(txStr += TextureName))
 	{
 		return false;
 	}
@@ -46,18 +45,14 @@ bool TextureManager::CreateTextureFromFile(const std::string & TextureName, size
 
 bool TextureManager::CreateTexture(const std::string & TextureName, unsigned int Format, uint32_t Width, uint32_t Height, size_t & TextureID)
 {
-	bool alreadyCreated = false;
-
-	GetTextureAndIDFromName(TextureName, alreadyCreated, TextureID);
-
-	if (alreadyCreated)
+	if (GetTextureAndIDFromName(TextureName, TextureID) != nullptr)
 	{
 		return true;
 	}
 
-	Texture texture;
+	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 
-	texture.GenerateTextureWithSize(Width, Height, Format);
+	texture->GenerateTextureWithSize(Width, Height, Format);
 
 	std::size_t hash = std::hash<std::string>{}(TextureName);
 	TextureID = hash;
@@ -67,51 +62,45 @@ bool TextureManager::CreateTexture(const std::string & TextureName, unsigned int
 	return true;
 }
 
-inline Texture & TextureManager::GetTextureFromID(size_t TextureID, bool & Found)
+std::shared_ptr<Texture> TextureManager::GetTextureFromID(size_t TextureID)
 {
-	Found = true;
-	std::map<std::size_t, Texture>::iterator it = Textures.find(TextureID);
+	std::map<std::size_t, std::shared_ptr<Texture>>::iterator it = Textures.find(TextureID);
 
 	if (it == Textures.end())
 	{
-		Found = false;
+		return nullptr;
 	}
 
 	return Textures[TextureID];
 }
 
-Texture & TextureManager::GetTextureAndIDFromName(const std::string & TextureName, bool & Found, size_t & ID)
+std::shared_ptr<Texture> TextureManager::GetTextureAndIDFromName(const std::string & TextureName, size_t & ID)
 {
-	Found = true;
-
 	std::size_t hash = std::hash<std::string>{}(TextureName);
 	ID = hash;
 	
-	return GetTextureFromID(hash, Found);
+	return GetTextureFromID(hash);
 }
 
-size_t TextureManager::GetIDFromName(const std::string & TextureName, bool & Found)
+size_t TextureManager::GetIDFromName(const std::string & TextureName)
 {
-	Found = true;
 
 	std::size_t hash = std::hash<std::string>{}(TextureName);
-	std::map<std::size_t, Texture>::iterator it = Textures.find(hash);
+	std::map<std::size_t, std::shared_ptr<Texture>>::iterator it = Textures.find(hash);
 
 	if (it == Textures.end())
 	{
-		Found = false;
+		return 0;
 	}
 
 	return hash;
 }
 
-Texture & TextureManager::GetTextureFromName(const std::string & TextureName, bool & Found)
+std::shared_ptr<Texture> TextureManager::GetTextureFromName(const std::string & TextureName)
 {
-	Found = true;
-
 	std::size_t hash = std::hash<std::string>{}(TextureName);
 
-	return GetTextureFromID(hash, Found);
+	return GetTextureFromID(hash);
 }
 
 void TextureManager::DestroyTexture(size_t ID)
@@ -126,7 +115,7 @@ void TextureManager::DestroyTexture(size_t ID)
 
 bool TextureManager::TextureExist(size_t ID)
 {
-	std::map<std::size_t, Texture>::iterator it = Textures.find(ID);
+	std::map<std::size_t, std::shared_ptr<Texture>>::iterator it = Textures.find(ID);
 
 	if (it == Textures.end())
 	{

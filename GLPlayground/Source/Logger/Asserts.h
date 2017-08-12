@@ -16,12 +16,24 @@
 	} \
 } \
 
+//Just a simple wrapper over default assert
+#define Assert(condition) {\
+assert(condition); \
+} \
+
+
+
 #else
 
 #define FailWithMessage(string) {\
 } \
 
 #define AssertWithMessage(condition, string) {\
+} \
+
+//Just a simple wrapper over default assert
+#define Assert(condition) {\
+assert(condition); \
 } \
 
 #endif

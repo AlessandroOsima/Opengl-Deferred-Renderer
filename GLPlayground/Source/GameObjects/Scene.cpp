@@ -7,13 +7,16 @@
 #include "Managers/ShaderManager.h"
 #include "Logger/Logger.h"
 #include "GameObjects/Components/Transform.h"
+#include "GameObjects/Objects/PointLightObject.h"
 #include "GameObjects/Objects/TexturedObject.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "Math/Filters.h"
 #include "Managers/TextureManager.h"
+#include <Managers/MeshManager.h>
 #include "Managers/InputManager.h"
 #include "GameObjects/Components/Text.h"
-
+#include "Managers/InputManager.h"
+#include <glm/gtx/rotate_vector.hpp>
 
 Scene::Scene(RenderableScene & RenderScene) : RenderScene(RenderScene)
 {
@@ -23,21 +26,25 @@ Scene::Scene(RenderableScene & RenderScene) : RenderScene(RenderScene)
 
 void Scene::Init()
 {
-	std::unique_ptr<Object> orginal = std::make_unique<TexturedObject>();
+
+	WindowInfo CurrentWindowInfo;
+	RenderScene.GetCurrentWindowInfo(CurrentWindowInfo);
+
+	glm::mat4 perspective = glm::perspective(glm::radians(45.f), (float)CurrentWindowInfo.Width / (float)CurrentWindowInfo.Height, 0.1f, 300.f);
+
+	RenderScene.SetProjection(perspective);
+
+	std::unique_ptr<Object> orginal = std::make_unique<TexturedObject>("apollocsm.obj");
 	orginal->SetLogicScene(this);
 	GameObjects.push_back(std::move(orginal));
 
-	std::unique_ptr<Object> sharpen = std::make_unique<TexturedObject>();
-	sharpen->SetLogicScene(this);
-	GameObjects.push_back(std::move(sharpen));
+	std::unique_ptr<Object> light = std::make_unique<PointLightObject>(0);
+	light->SetLogicScene(this);
+	GameObjects.push_back(std::move(light));
 
-	std::unique_ptr<Object> smooth = std::make_unique<TexturedObject>();
-	smooth->SetLogicScene(this);
-	GameObjects.push_back(std::move(smooth));
-
-	std::unique_ptr<Object> sobel = std::make_unique<TexturedObject>();
-	sobel->SetLogicScene(this);
-	GameObjects.push_back(std::move(sobel));
+	/*std::unique_ptr<Object> obj2 = std::make_unique<TexturedObject>("ccube.obj");
+	obj2->SetLogicScene(this);
+	GameObjects.push_back(std::move(obj2));*/
 
 	for (auto & gameObject : GameObjects)
 	{
@@ -54,7 +61,7 @@ void Scene::Init()
 		return;
 	}
 
-	TextureInfo info = TextureManager::GetTextureManager().GetTextureFromID(textureID, Found).GetTextureInfo();
+	TextureInfo info = TextureManager::GetTextureManager().GetTextureFromID(textureID)->GetTextureInfo();
 
 	int sizeX = info.Width;
 	int sizeY = info.Height;
@@ -65,130 +72,72 @@ void Scene::Init()
 
 	//ORIGINAL
 	Transform * originalTransform = static_cast<Transform*>(GameObjects[0]->GetComponentOfType(ComponentsType::Transform));
-	originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY * 3, 0)));
+	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3( CurrentWindowInfo.Width / 2, CurrentWindowInfo.Height / 2, -0.1f)));
 
-	originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 1.f)));
-
-	//SHARPEN
-	Transform * sharpenTransform = static_cast<Transform*>(GameObjects[1]->GetComponentOfType(ComponentsType::Transform));
-	sharpenTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX * 3, inWindowSizeY * 3, 0)));
-
-	sharpenTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 1.f)));
-
-	//SMOOTH
-	Transform * smoothTransform = static_cast<Transform*>(GameObjects[2]->GetComponentOfType(ComponentsType::Transform));
-	smoothTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 0)));
-
-	smoothTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 1.f)));
-
-	//FILTERED
-	Transform * filteredTransform = static_cast<Transform*>(GameObjects[3]->GetComponentOfType(ComponentsType::Transform));
-	filteredTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(inWindowSizeX * 3, inWindowSizeY, 0)));
-
-	filteredTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(inWindowSizeX, inWindowSizeY, 1.f)));
-
-	size_t BaseHash;
-	size_t GrayscaleHash;
-	size_t BoxHash;
-	size_t SobelHash;
-	size_t ThresholdHash;
+	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0,-10, -30.f)));
+	//originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(2.f, 2.f, 2.f)));
 
 
-	if (ShaderManager::GetShaderManager().CreateShader("threshold", "threshold.vs", "threshold.fs", ThresholdHash) && ShaderManager::GetShaderManager().CreateShader("base", "base.vs", "base.fs", BaseHash) && ShaderManager::GetShaderManager().CreateShader("grayscale", "grayscale.vs", "grayscale.fs", GrayscaleHash) && ShaderManager::GetShaderManager().CreateShader("box", "box.vs", "box.fs", BoxHash) &&  ShaderManager::GetShaderManager().CreateShader("sobel", "sobel.vs", "sobel.fs", SobelHash))
+	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0.f, -10.f, -30.f)));
+	//originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(15.f, 15.f, 15.f)));
+
+	originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0.f, -0.3f, -30.f)));
+	originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(0.2f, 0.2f, 0.2f)));
+
+
+	/*originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0.f, 0.f, -10.f)));
+	originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(6, 6, 6)));
+	originalTransform->SetRotate(glm::rotate(glm::radians(90.f), glm::vec3(1.f, 1.f, 0.f)));*/
+
+	Transform * lightTransform = static_cast<Transform*>(GameObjects[1]->GetComponentOfType(ComponentsType::Transform));
+
+	lightTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(10.0f, 5.f, -20.f)));
+
+
+	//originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(1.f, 1.f, 1.f)));
+
+	//Transform * obj2Transform = static_cast<Transform*>(GameObjects[1]->GetComponentOfType(ComponentsType::Transform));
+	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3( CurrentWindowInfo.Width / 2, CurrentWindowInfo.Height / 2, -0.1f)));
+
+	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0,0, -5.f)));
+
+	//obj2Transform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(+1, -1, -5.f)));
+
+	//originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(1.f, 1.f, 1.f)));
+
+	size_t DeferredLightingHash;
+
+	if (ShaderManager::GetShaderManager().CreateShader("deferredLightingGeometry", "deferredLightingGeometry.vs", "deferredLightingGeometry.fs", DeferredLightingHash))
 	{
 		//Set Up Renderpasses on Objects
 		{
-			RenderPassGroup originalPassGroup(sizeX, sizeY);
-
-			Material passBaseMaterial{ textureID, BaseHash };
-			RenderPass passBase(std::move(passBaseMaterial), true, true);
-			originalPassGroup.RenderPasses.push_back(std::move(passBase));
-
 			Renderable * originalRenderable = static_cast<Renderable*>(GameObjects[0]->GetComponentOfType(ComponentsType::Renderable));
-			originalRenderable->AddPassesOnMesh(std::move(originalPassGroup));
+			
+			auto & material = originalRenderable->GetMesh()->GetMaterial();
+			material.Program = DeferredLightingHash;
 
-			Text * originalText = static_cast<Text*>(GameObjects[0]->GetComponentOfType(ComponentsType::Text));
-			originalText->SetText("ORIGINAL", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			//UniformTypeData Diffuse;
+			//Diffuse.vec4Val = glm::vec4(0.95f, 0.95f, 0.0f, 1.0f);
+			//material.AddUniform({"material.Diffuse", Diffuse, UniformType::Vec4});
 
-		}
+			//UniformTypeData Specular;
+			//Specular.vec4Val = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+			//material.AddUniform({ "material.Specular", Specular, UniformType::Vec4 });
 
-		{
-			RenderPassGroup sharpenPassGroup(sizeX, sizeY);
+			//UniformTypeData Shininess;
+			//Shininess.floatVal = 300;
+			//material.AddUniform({ "material.Shininess", Shininess, UniformType::Float });
 
-			Material passGrayMaterial{ textureID, GrayscaleHash };
-			RenderPass passGray(std::move(passGrayMaterial), false, true);
-			sharpenPassGroup.RenderPasses.push_back(std::move(passGray));
+			//UniformTypeData ColorType;
+			//ColorType.floatVal = static_cast<int>(DiffuseType::Diffuse);
+			//material.AddUniform({ "material.DiffuseType", ColorType, UniformType::Float });
 
-			Material passSharpMaterial{ textureID, BoxHash };
-			RenderPass passSharp(std::move(passSharpMaterial), true, true);
-			UniformTypeData sharpUniformData{ Filters::GenerateSharpenMatrix(true) };
-			UniformsToBind sharpUniform{ "Mask", sharpUniformData, UniformType::Mat3 };
-			passSharp.AddUniform(sharpUniform);
+			auto MaterialParams = std::make_unique<DeferredBlinnPhongMeshMaterialParameters>();
 
-			sharpenPassGroup.RenderPasses.push_back(std::move(passSharp));
+			MaterialParams->Diffuse = glm::vec4(1, 1, 1, 1);
 
-			Renderable * sharpenRenderable = static_cast<Renderable*>(GameObjects[1]->GetComponentOfType(ComponentsType::Renderable));
-			sharpenRenderable->AddPassesOnMesh(std::move(sharpenPassGroup));
-
-			Text * sharpenText = static_cast<Text*>(GameObjects[1]->GetComponentOfType(ComponentsType::Text));
-			sharpenText->SetText("GRAYSCALE + SHARPEN 3x3 FACTOR 9", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-280, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
-		} 
-		
-		{
-			RenderPassGroup passGroup(sizeX, sizeY);
-
-			Material passSmoothMaterial{ textureID, BoxHash };
-			RenderPass passSmooth(std::move(passSmoothMaterial), true, true);
-			UniformTypeData smoothUniformData{ Filters::GenerateSmoothingMatrix() };
-			UniformsToBind smoothUniform{ "Mask", smoothUniformData, UniformType::Mat3 };
-			passSmooth.AddUniform(smoothUniform);
-			passGroup.RenderPasses.push_back(std::move(passSmooth));
-
-			Renderable * renderable = static_cast<Renderable*>(GameObjects[2]->GetComponentOfType(ComponentsType::Renderable));
-			renderable->AddPassesOnMesh(std::move(passGroup));
-
-			Text * smoothText = static_cast<Text*>(GameObjects[2]->GetComponentOfType(ComponentsType::Text));
-			smoothText->SetText("BLUR 3x3", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-50, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
-		}
-
-		{
-			RenderPassGroup passGroup(sizeX, sizeY);
-
-			Material passGrayMaterial{ textureID, GrayscaleHash };
-			RenderPass passGray(std::move(passGrayMaterial), false, true);
-			passGroup.RenderPasses.push_back(std::move(passGray));
-
-			Material passSmoothMaterial{ textureID, BoxHash };
-			RenderPass passSmooth(std::move(passSmoothMaterial), false, true);
-			UniformTypeData smoothUniformData{ Filters::GenerateSmoothingMatrix() };
-			UniformsToBind smoothUniform{ "Mask", smoothUniformData, UniformType::Mat3 };
-			passSmooth.AddUniform(smoothUniform);
-			passGroup.RenderPasses.push_back(std::move(passSmooth));
-
-			/*Material passSharpenMaterial{ textureID, BoxHash };
-			RenderPass passSharpen(std::move(passSharpenMaterial), true, true);
-			UniformTypeData sharpenUniformData{ Filters::GenerateLaplacian() };
-			UniformsToBind sharpenUniform{ "Mask", sharpenUniformData, UniformType::Mat3 };
-			passSharpen.AddUniform(sharpenUniform);
-			passGroup.RenderPasses.push_back(std::move(passSharpen));*/
-
-			Material passSobelMaterial{ textureID, SobelHash };
-			RenderPass passSobel(std::move(passSobelMaterial), true, true);
-			passGroup.RenderPasses.push_back(std::move(passSobel));
-
-			Material thresholdMaterial{ textureID, ThresholdHash };
-			RenderPass passThreshold(std::move(thresholdMaterial), true, true);
-			UniformTypeData thresholdUniformData = { glm::mat3{} };
-			thresholdUniformData.floatVal = 0.2f;
-			UniformsToBind thresholdUniform{ "threshold", thresholdUniformData, UniformType::Float };
-			passThreshold.AddUniform(thresholdUniform);
-			passGroup.RenderPasses.push_back(std::move(passThreshold));
-
-			Renderable * filteredRenderable = static_cast<Renderable*>(GameObjects[3]->GetComponentOfType(ComponentsType::Renderable));
-			filteredRenderable->AddPassesOnMesh(std::move(passGroup));
-
-			Text * filteredText = static_cast<Text*>(GameObjects[3]->GetComponentOfType(ComponentsType::Text));
-			filteredText->SetText("GRAYSCALE + BLUR 3x3 + SOBEL + THRESHOLD", glm::vec4(0, 0.6f, 1, 1), glm::vec3(-315, inWindowSizeY - 25, -0.1f), "arial.ttf", true, true);
+			originalRenderable->GetMesh()->SetMaterialParameters(std::move(MaterialParams));
+			originalRenderable->GetMesh()->LinkMaterialData();
 		}
 	}
 }

@@ -12,17 +12,18 @@ Object::~Object()
 {
 }
 
-size_t Object::AddComponent(std::unique_ptr<Component> && ComponentToAdd)
-{
-	Components.push_back(std::move(ComponentToAdd));
-	ComponentLocation loc = Components.size() - 1;
+//size_t Object::AddComponent(std::unique_ptr<Component> && ComponentToAdd)
+//{
+//	Components.push_back(std::move(ComponentToAdd));
+//	ComponentLocation loc = Components.size() - 1;
+//
+//	Components[loc]->OnAttached(this);
+//	Components[loc]->SetLogicScene(LogicScene);
+//	Components[loc]->Start();
+//
+//	return Components.size() - 1;
+//}
 
-	Components[loc]->OnAttached(this);
-	Components[loc]->SetLogicScene(LogicScene);
-	Components[loc]->Start();
-
-	return Components.size() - 1;
-}
 
 void Object::RemoveComponent(ComponentLocation Location)
 {

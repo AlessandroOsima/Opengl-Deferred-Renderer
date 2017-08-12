@@ -2,6 +2,7 @@
 #include "Renderable.h"
 #include "Logger/Logger.h"
 #include "GameObjects/Components/Transform.h"
+#include "glm/gtc/random.hpp"
 
 Renderable::Renderable()
 {
@@ -19,6 +20,7 @@ void Renderable::Start()
 
 void Renderable::Update(float DeltaTime)
 {
+
 }
 
 void Renderable::LateUpdate(float DeltaTime)
@@ -32,6 +34,7 @@ void Renderable::LateUpdate(float DeltaTime)
 		Transform * tr = static_cast<Transform *>(cmp);
 
 		Mesh->SetModel(tr->GetWorld());
+
 	}
 	else
 	{
@@ -44,15 +47,6 @@ void Renderable::End()
 	if (LogicScene && MeshIsRendering)
 	{
 		LogicScene->GetRenderScene().RemoveMesh(Loc);
-	}
-}
-
-void Renderable::AddPassesOnMesh(RenderPassGroup && PassGroup)
-{
-	if (LogicScene)
-	{
-		RenderablPassLocation passLocation = LogicScene->GetRenderScene().AddRenderPassGroup(std::move(PassGroup));
-		LogicScene->GetRenderScene().LinkMeshMultiPass(Loc, passLocation);
 	}
 }
 

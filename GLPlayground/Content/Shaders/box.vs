@@ -9,6 +9,7 @@ layout (binding = 0) uniform Matrices
 	mat4 Projection;
 	mat4 View;
 	mat4 Model;
+	mat4 Normal;
 };
 
 

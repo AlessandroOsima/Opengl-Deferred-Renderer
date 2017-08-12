@@ -9,6 +9,11 @@ union UniformTypeData
 	glm::vec4 vec4Val;
 	glm::vec3 vec3Val;
 	float floatVal;
+	int IntVal;
+	UniformTypeData()
+	{
+		memset(this, 0, sizeof(*this));
+	}
 };
 
 enum class UniformType
@@ -17,13 +22,25 @@ enum class UniformType
 	Mat3,
 	Vec4,
 	Vec3,
-	Float
+	Float,
+	Int
 };
 
 struct UniformsToBind
 {
+	
 	std::string UniformName;
 	UniformTypeData TypeData;
 	UniformType Type;
+
+	bool operator==(const UniformsToBind & Other)
+	{
+		if (UniformName == Other.UniformName && Type == Other.Type)
+		{
+			return true;
+		}
+
+		return false;
+	}
 };
 

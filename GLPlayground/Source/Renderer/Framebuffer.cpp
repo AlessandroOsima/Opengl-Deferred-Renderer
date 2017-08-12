@@ -15,84 +15,61 @@ Framebuffer::~Framebuffer()
 
 void Framebuffer::BindFramebuffer(FramebufferBindType BindType)
 {
+	BindingTarget = BindType;
 
-	switch (BindType)
-	{
-	case FramebufferBindType::READ:
-	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, OffscreenFramebufferID);
-		break;
-	}
-	case FramebufferBindType::DRAW:
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, OffscreenFramebufferID);
-		break;
-	}
-	case FramebufferBindType::FRAMEBUFFER:
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, OffscreenFramebufferID);
-		break;
-	}
-	default:
-		break;
-	}
+	glBindFramebuffer(static_cast<GLenum>(BindingTarget), OffscreenFramebufferID);
 }
 
 void Framebuffer::UnBindFramebuffer()
 {
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(static_cast<GLenum>(BindingTarget), 0);
 }
 
-void Framebuffer::BindTextureToFramebuffer(const Texture & TextureToBind, FrameBufferAttachmentType Attachment, uint32_t Level)
+bool Framebuffer::IsComplete()
 {
-	switch (Attachment)
+	GLint boundFB = 0;
+
+	switch (BindingTarget)
 	{
-	case FrameBufferAttachmentType::COLOR:
+	case FramebufferBindType::READ:
 	{
-		glNamedFramebufferTexture(OffscreenFramebufferID, GL_COLOR_ATTACHMENT0, TextureToBind.GetID(), Level);
+		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &boundFB);
+
 		break;
+	}
+	case FramebufferBindType::DRAW:
+	{
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &boundFB);
+
+		break;
+	}
+	case FramebufferBindType::FRAMEBUFFER:
+	{
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &boundFB);
+
+		break;
+	}
+	}
+	bool checked = false;
+
+	if (boundFB && boundFB == OffscreenFramebufferID)
+	{
+		GLenum res = glCheckNamedFramebufferStatus(OffscreenFramebufferID, static_cast<GLenum>(BindingTarget));
+		if (res == GL_FRAMEBUFFER_COMPLETE)
+		{
+			checked = true;
+		}
 	}
 
-	case FrameBufferAttachmentType::DEPTH:
-	{
-		glNamedFramebufferTexture(OffscreenFramebufferID, GL_DEPTH_ATTACHMENT, TextureToBind.GetID(), Level);
-		break;
-	}
-
-	case FrameBufferAttachmentType::STENCIL:
-	{
-		glNamedFramebufferTexture(OffscreenFramebufferID, GL_STENCIL_ATTACHMENT, TextureToBind.GetID(), Level);
-		break;
-	}
-
-	default:
-		break;
-	}
+	return checked;
 }
 
-void Framebuffer::UnbindFramebufferAttachment(FrameBufferAttachmentType Attachment)
+void Framebuffer::BindTextureToFramebuffer(const Texture & TextureToBind, unsigned int AttachmentPoint, uint32_t Level)
 {
-	switch (Attachment)
-	{
-	case FrameBufferAttachmentType::COLOR:
-	{
-		glNamedFramebufferTexture(OffscreenFramebufferID, GL_COLOR_ATTACHMENT0, 0, 0);
-		break;
-	}
+	glNamedFramebufferTexture(OffscreenFramebufferID, AttachmentPoint, TextureToBind.GetID(), Level);
+}
 
-	case FrameBufferAttachmentType::DEPTH:
-	{
-		glNamedFramebufferTexture(OffscreenFramebufferID, GL_DEPTH_ATTACHMENT, 0, 0);
-		break;
-	}
-
-	case FrameBufferAttachmentType::STENCIL:
-	{
-		glNamedFramebufferTexture(OffscreenFramebufferID, GL_STENCIL_ATTACHMENT, 0, 0);
-		break;
-	}
-
-	default:
-		break;
-	}
+void Framebuffer::UnbindFramebufferAttachment(unsigned int AttachmentPoint)
+{
+	glNamedFramebufferTexture(OffscreenFramebufferID, AttachmentPoint, 0, 0);
 }

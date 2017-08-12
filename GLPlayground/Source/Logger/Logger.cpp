@@ -9,7 +9,7 @@ Logger::Logger() : LogFileEnable(false)
 
 	if (FileStream.fail())
 	{
-		std::cout << "ERROR : File open failed with error : " << strerror(errno) <<std::endl;
+		std::cout << "ERROR : Log File open failed with error : " << strerror(errno) <<std::endl;
 	}
 
 	LogString("Started Log sequence", LogType::LOG);
@@ -31,7 +31,7 @@ void Logger::LogString(const std::string & String, LogType Type)
 		 logType = "WARNIG -> ";
 	  	 break;
 	  }
-	  case LogType::LOG:
+	  case LogType::LOG: 
 	  {
 		  logType = "LOG -> ";
 	     break;
@@ -49,6 +49,11 @@ void Logger::LogString(const std::string & String, LogType Type)
 	if (LogFileEnable && FileStream.is_open() && !FileStream.fail())
 	{
 		FileStream << logType << String << std::endl;
+	}
+
+	if (Type == LogType::ERROR)
+	{
+		Assert(0);
 	}
 }
 

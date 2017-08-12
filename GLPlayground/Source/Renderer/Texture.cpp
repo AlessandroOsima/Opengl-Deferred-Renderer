@@ -63,18 +63,20 @@ void Texture::SetImageData(unsigned int Level, int OffsetX, int OffsetY, int Wid
 	glCheckFunction(glTextureSubImage2D(ID, Level, OffsetX, OffsetY, Width, Height, Format, Type, Data));
 }
 
-void Texture::Bind()
+void Texture::Bind(unsigned int Location)
 {
-	glCheckFunction(glBindTextureUnit(0, ID));
+	BindLocation = Location;
+	glCheckFunction(glBindTextureUnit(Location, ID));
+
 }
 
 void Texture::UnBind()
 {
-	//glBindTextureUnit(0, 0);
+	//glBindTextureUnit(BindLocation, 0);
 }
 
 Texture::~Texture()
 {
-	if (ID != INVALID_ID)
+	if (ID != Texture::INVALID_ID)
 		glDeleteTextures(0, &ID);
 }

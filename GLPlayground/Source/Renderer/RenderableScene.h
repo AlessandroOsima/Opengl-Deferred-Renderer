@@ -4,21 +4,19 @@
 #include <memory>
 #include "Renderer/GLRenderer.h"
 #include "Renderer/Framebuffer.h"
-#include "Renderer/RenderPass.h"
+#include "Renderer/RenderingInfo.h"
 #include <limits>
-
-
-using RenderableMeshLocation = uint64_t;
-using RenderablPassLocation = uint64_t;
-
-constexpr RenderablPassLocation InvalidRenderpassIndex = std::numeric_limits<size_t>::max();
-
+#include <list>
+#include "Renderer/PrimitiveDrawer.h"
+#include "Renderer/Lights/Lights.h"
+#include "Renderer/Sampler.h"
 
 struct MeshStorageInfo
 {
 	std::shared_ptr<Mesh> Mesh;
-	RenderablPassLocation Location = InvalidRenderpassIndex;
 };
+
+using RenderableMeshLocation = std::list<MeshStorageInfo>::iterator;
 
 class RenderableScene
 {
@@ -34,23 +32,27 @@ public:
 	void DeInitialize();
 
 	RenderableMeshLocation AddMesh(std::shared_ptr<Mesh> MeshToAdd);
-	RenderableMeshLocation AddMeshMultipass(std::shared_ptr<Mesh> MeshToAdd, RenderPassGroup && PassesToAdd);
 	
 	void RemoveMesh(RenderableMeshLocation Location);
 
-	RenderablPassLocation AddRenderPassGroup(RenderPassGroup && PassesToAdd);
-	void RemoveRenderPassGroup(RenderablPassLocation Location);
-
-	bool LinkMeshMultiPass(RenderableMeshLocation Mesh, RenderablPassLocation Pass);
-
 	inline void SetProjection(const glm::mat4 & Projection)
 	{
-		CurrentProjection = Projection;
+		UniformMatricesBuffer.Projection = Projection;
+	}
+
+	inline void SetDepthEnabled(bool Enabled)
+	{
+		Renderer.EnableDepthTest(Enabled);
 	}
 
 	inline void SetView(const glm::mat4 & View)
 	{
-		CurrentView = View;
+		UniformMatricesBuffer.View = View;
+	}
+
+	inline void GetCurrentWindowInfo(WindowInfo & CurrentWindowInfo)
+	{
+		return Renderer.GetCurrentWindowInfo(CurrentWindowInfo);
 	}
 
 	size_t CreateFontRenderer(std::string FontName);
@@ -69,20 +71,20 @@ public:
 		return &FontRenderers[FontRendererID];
 	}
 
+	inline PrimitiveDrawer & GetPrimitiveDrawer()
+	{
+		return Drawer;
+	}
+
+	SceneLights Lights;
+
 private:
-	std::vector<MeshStorageInfo> Meshes;
-	std::vector<RenderPassGroup> Passes;
+
 
 	GLRenderer & Renderer;
 
-	RenderableMeshLocation FirstRenderableMeshFree = 0;
-	RenderablPassLocation  FirstRenderPassFree = 0;
-
 	uint32_t UniformMatricesBufferID;
 	UniformMatrices UniformMatricesBuffer;
-
-	glm::mat4 CurrentView;
-	glm::mat4 CurrentProjection;
 
 	Framebuffer OffscreenFramebuffer;
 	size_t OffscreenFBColorAttachment;
@@ -90,5 +92,30 @@ private:
 	Material BaseMaterial;
 
 	std::map<size_t, FontRenderer> FontRenderers;
+
+	std::list<MeshStorageInfo> MeshList;
+
+	PrimitiveDrawer Drawer;
+
+	uint32_t UniformLightsBufferID;
+
+	Framebuffer GBuffer;
+
+	Texture Position;
+	Texture Normals;
+	Texture Diffuse;
+	Texture Specular;
+	Texture Ambient;
+
+	Texture Depth;
+
+	std::shared_ptr<Mesh> FullscreenLightpassQuad;
+
+	Sampler PositionSampler;
+	Sampler NormalsSampler;
+	Sampler DiffuseSampler;
+	Sampler SpecularSampler;
+	Sampler AmbientSampler;
+
 };
 

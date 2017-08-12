@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 #include <string>
+
 using TextureID = uint32_t;
-const TextureID INVALID_ID = 0;
 
 struct TextureInfo
 {
@@ -15,6 +15,9 @@ struct TextureInfo
 class Texture
 {
 public:
+
+	static const TextureID INVALID_ID = 0;
+
 	Texture();
 
 	bool LoadFromFile(const std::string & ImageFile);
@@ -33,13 +36,15 @@ public:
 		return Info;
 	}
 
-	void Bind();
+	void Bind(unsigned int Location);
 	void UnBind();
 
 	~Texture();
 
 private:
-	TextureID ID = INVALID_ID;
+	TextureID ID = Texture::INVALID_ID;
 	TextureInfo Info;
+
+	unsigned int BindLocation;
 };
 

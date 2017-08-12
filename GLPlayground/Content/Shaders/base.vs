@@ -8,8 +8,10 @@ layout (binding = 0) uniform Matrices
 {
 	mat4 Projection;
 	mat4 View;
-	mat4 Model;
 };
+
+uniform mat4 Model;
+uniform mat3 Normal;
 
 
 out vec4 fragmentColor;
