@@ -1,1 +1,9 @@
-An OpenGL application implementing image filters on textures. Each filter is implemented in a fragment shader and the application supports multipass rendering to apply a chain of filters on the same texture. Currently Median, Sobel, Sharpen and Sharpen filters are implemented.
+A very WIP OpenGL 4.5 renderer.
+
+Current Features in various stages of development
+
+-Deferred Renderer
+-Forward Renderer
+-Font Renderer
+-Simple Primitive Drawers interface (aka DrawLine, DrawCube, ecc)
+-GameObject/Component Architecture
