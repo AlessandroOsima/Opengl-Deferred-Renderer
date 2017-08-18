@@ -6,9 +6,9 @@ class Scene
 {
 public:
 	Scene(RenderableScene & RenderScene);
-	void Init();
+	void Initialize();
 	void Update(float DeltaTime);
-	void DeInit();
+	void DeInitialize();
 
 	inline RenderableScene & GetRenderScene() const
 	{

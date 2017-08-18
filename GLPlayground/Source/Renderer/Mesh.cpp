@@ -62,7 +62,7 @@ void Mesh::Bind()
 
 }
 
-void Mesh::Unbind()
+void Mesh::UnBind()
 {
 	VData->Unbind();
 	MaterialParameters->UnbindParameters(this);

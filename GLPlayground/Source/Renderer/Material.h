@@ -9,9 +9,13 @@ using UniformIt = std::list<UniformsToBind>::iterator;
 
 enum class DiffuseType : int
 {
-	Diffuse,
-	Emissive
+	Diffuse = 0,
+	Emissive = 1
 };
+
+//Material Management Class 
+//This class has utility methods and storage to set and manage a shader and its resources like uniforms and samplers
+//This is and must remain a generic interface, the actual parameters like Diffuse, ecc are set by a BaseMeshMaterialParameters derived class
 
 class Material
 {

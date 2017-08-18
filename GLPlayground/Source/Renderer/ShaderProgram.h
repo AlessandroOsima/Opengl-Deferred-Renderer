@@ -38,7 +38,7 @@ public:
 	void SetUniformVector4(unsigned int Location, const glm::vec4 & Vec4Val);
 	void SetUniformVector3(unsigned int Location, const glm::vec3 & Vec3Val);
 	void SetUniformFloat(unsigned int Location, float FloatVal);
-
+	void SetUniformInt(unsigned int Location, int IntVal);
 
 private:
 	GLuint VertexShaderID;

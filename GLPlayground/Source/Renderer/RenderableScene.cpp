@@ -162,7 +162,7 @@ void RenderableScene::RenderScene(float DeltaTime)
 
 		Renderer.DrawMesh(*mesh.Mesh);
 
-		mesh.Mesh->Unbind();
+		mesh.Mesh->UnBind();
 
 	}
 
@@ -172,7 +172,6 @@ void RenderableScene::RenderScene(float DeltaTime)
 
 	Renderer.Clear();
 	
-
 	Position.Bind(0);
 	PositionSampler.Bind(0);
 	Normals.Bind(1);
@@ -202,12 +201,8 @@ void RenderableScene::RenderScene(float DeltaTime)
 	Ambient.UnBind();
 	AmbientSampler.UnBind();
 
+	FullscreenLightpassQuad->UnBind();
 
-
-	FullscreenLightpassQuad->Unbind();
-
-	
-	
 	Drawer.Render();
 
 	for (auto & fontRenderer : FontRenderers)
@@ -220,6 +215,15 @@ void RenderableScene::RenderScene(float DeltaTime)
 
 void RenderableScene::DeInitialize()
 {
+
+	GBuffer.UnBindFramebuffer();
+	GBuffer.UnbindFramebufferAttachment(GL_COLOR_ATTACHMENT0);
+	GBuffer.UnbindFramebufferAttachment(GL_COLOR_ATTACHMENT1);
+	GBuffer.UnbindFramebufferAttachment(GL_COLOR_ATTACHMENT2);
+	GBuffer.UnbindFramebufferAttachment(GL_COLOR_ATTACHMENT3);
+	GBuffer.UnbindFramebufferAttachment(GL_COLOR_ATTACHMENT4);
+	GBuffer.UnbindFramebufferAttachment(GL_DEPTH_ATTACHMENT);
+
 	for (auto & fontRenderer : FontRenderers)
 	{
 		fontRenderer.second.DeInit();

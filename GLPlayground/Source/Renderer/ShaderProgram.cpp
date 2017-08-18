@@ -209,3 +209,8 @@ void ShaderProgram::SetUniformFloat(unsigned int Location, float FloatVal)
 {
 	glUniform1f(Location, FloatVal);
 }
+
+void ShaderProgram::SetUniformInt(unsigned int Location, int IntVal)
+{
+	glUniform1i(Location, IntVal);
+}

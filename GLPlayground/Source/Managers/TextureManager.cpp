@@ -14,6 +14,7 @@ TextureManager::TextureManager()
 
 TextureManager::~TextureManager()
 {
+
 }
 
 bool TextureManager::CreateTextureFromFile(const std::string & TextureName, size_t & TextureID)

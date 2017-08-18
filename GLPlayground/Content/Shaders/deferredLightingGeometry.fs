@@ -32,7 +32,7 @@ struct Material
 	vec4 Diffuse;
 	vec4 Specular;
 	float Shininess;
-	float DiffuseType;
+	int DiffuseType;
 };
 
 uniform Material material;
@@ -43,5 +43,5 @@ void main()
 	normalPixel = vec4(normalize(pixelNormal),1);
 	diffusePixel = material.Diffuse;
 	specularPixel = vec4(material.Specular.xyz, 1);
-	ambientPixel = vec4(material.Shininess,material.DiffuseType,0,1);
+	ambientPixel = vec4(material.Shininess, material.DiffuseType,0,1);
 }

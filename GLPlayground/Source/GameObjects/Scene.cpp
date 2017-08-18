@@ -24,7 +24,7 @@ Scene::Scene(RenderableScene & RenderScene) : RenderScene(RenderScene)
 }
 
 
-void Scene::Init()
+void Scene::Initialize()
 {
 
 	WindowInfo CurrentWindowInfo;
@@ -55,7 +55,7 @@ void Scene::Init()
 
 	size_t textureID;
 
-	if (!TextureManager::GetTextureManager().CreateTextureFromFile("test.jpg", textureID))
+	if (!TextureManager::GetTextureManager().CreateTextureFromFile("cube.png", textureID))
 	{
 		Logger::GetLogger().LogString("Unable to find texture info for test.jpg", LogType::ERROR);
 		return;
@@ -74,6 +74,7 @@ void Scene::Init()
 	Transform * originalTransform = static_cast<Transform*>(GameObjects[0]->GetComponentOfType(ComponentsType::Transform));
 	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3( CurrentWindowInfo.Width / 2, CurrentWindowInfo.Height / 2, -0.1f)));
 
+	
 	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0,-10, -30.f)));
 	//originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(2.f, 2.f, 2.f)));
 
@@ -81,6 +82,7 @@ void Scene::Init()
 	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0.f, -10.f, -30.f)));
 	//originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(15.f, 15.f, 15.f)));
 
+	//APOLLO
 	originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0.f, -0.3f, -30.f)));
 	originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(0.2f, 0.2f, 0.2f)));
 
@@ -88,6 +90,10 @@ void Scene::Init()
 	/*originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0.f, 0.f, -10.f)));
 	originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(6, 6, 6)));
 	originalTransform->SetRotate(glm::rotate(glm::radians(90.f), glm::vec3(1.f, 1.f, 0.f)));*/
+
+	//CUBE
+	//originalTransform->SetTranslate(glm::translate(glm::mat4(), glm::vec3(0, 0, -20.f)));
+	//originalTransform->SetScale(glm::scale(glm::mat4(), glm::vec3(2.f, 2.f, 2.f)));
 
 	Transform * lightTransform = static_cast<Transform*>(GameObjects[1]->GetComponentOfType(ComponentsType::Transform));
 
@@ -150,7 +156,7 @@ void Scene::Update(float DeltaTime)
 	}
 }
 
-void Scene::DeInit()
+void Scene::DeInitialize()
 {
 	for (auto & gameObject : GameObjects)
 	{

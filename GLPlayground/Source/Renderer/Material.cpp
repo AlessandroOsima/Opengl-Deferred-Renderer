@@ -198,7 +198,7 @@ void Material::SetUniforms()
 
 				case  UniformType::Int:
 				{
-					shader.SetUniformFloat(index, uniform.TypeData.IntVal);
+					shader.SetUniformInt(index, uniform.TypeData.IntVal);
 					break;
 				}
 

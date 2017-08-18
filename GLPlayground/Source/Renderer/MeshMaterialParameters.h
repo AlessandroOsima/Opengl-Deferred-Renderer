@@ -44,15 +44,21 @@ public:
 	virtual bool IsValidForMaterial(const Material & CurrentMaterial);
 };
 
-//Standard shader for the geometry pass of the blinn-phong shader
+//Standard shader for the geometry pass of the blinn-phong BRDF
 class DeferredBlinnPhongMeshMaterialParameters : public BaseMeshMaterialParameters
 {
 
 public:
 
+	//If we have a valid texture use it instead of the diffuse color 
 	glm::vec4 Diffuse = glm::vec4(0.95f, 0.95f, 0.0f, 1.0f);
+	size_t DiffuseTexture = Texture::INVALID_ID;
+
+
 	glm::vec4 Specular = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
+
 	float Shininess = 300;
+
 	DiffuseType DiffuseColorType = DiffuseType::Diffuse;
 
 	virtual bool LinkParameters(Mesh * CurrentMesh);

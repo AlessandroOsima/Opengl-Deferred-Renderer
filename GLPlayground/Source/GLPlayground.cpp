@@ -41,12 +41,62 @@ GLFWwindow * CreateWindow(const WindowInfo & Window, const std::string & WindowT
 
 }
 
+//Separation is done here to force destruction of glfw related objects before glfwTerminate is called
+void RunMainLoop(GLFWwindow * window)
+{
+	Assert(window);
+
+	GLRenderer renderer;
+
+	if (!renderer.Initialize(window))
+	{
+		glfwTerminate();
+		return;
+	}
+
+	InputManager & InputManagerInstance = InputManager::GetInputManager();
+	InputManagerInstance.Initialize(*window);
+
+	RenderableScene renderScene(renderer);
+	Scene scene(renderScene);
+
+	renderScene.Initialize();
+	scene.Initialize();
+
+
+	double StartTime, EndTime;
+	float DeltaTime = 0;
+
+	bool ShouldTerminate = false;
+	InputManager::GetInputManager() += [&](KeyState keyState, KeyCode keyCode)
+	{
+		if (keyCode == KeyCode::Escape && keyState == KeyState::PRESSED)
+		{
+			ShouldTerminate = true;
+			Logger::GetLogger().LogString("Escape Key Detected, Terminating", LogType::LOG);
+		}
+	};
+
+	while (!ShouldTerminate && !glfwWindowShouldClose(window))
+	{
+		StartTime = glfwGetTime();
+
+		glfwPollEvents();
+
+		scene.Update(DeltaTime);
+		renderScene.RenderScene(DeltaTime);
+		EndTime = glfwGetTime();
+
+		DeltaTime = static_cast<float>(EndTime - StartTime);
+	}
+
+	scene.DeInitialize();
+	renderScene.DeInitialize();
+}
+
 int main()
 {
 	Logger::GetLogger().LogOnFile(true);
-
-	GLRenderer renderer;
-	InputManager & InputManagerInstance = InputManager::GetInputManager();
 
 	glfwSetErrorCallback(GLFWErrorCallback);
 
@@ -68,56 +118,7 @@ int main()
 
 	glfwMakeContextCurrent(window);
 
-	if (!renderer.Initialize(window))
-	{
-		glfwTerminate();
-		return -1;
-	}
-
-	InputManagerInstance.Initialize(*window);
-	RenderableScene renderScene(renderer);
-	Scene scene(renderScene);
-
-	renderScene.Initialize();
-	scene.Init();
-	
-
-	double StartTime, EndTime;
-	float DeltaTime = 0;
-
-	bool ShouldTerminate = false;
-	InputManager::GetInputManager() += [&](KeyState keyState, KeyCode keyCode)
-	{
-		if (keyCode == KeyCode::Escape && keyState == KeyState::PRESSED)
-		{
-			ShouldTerminate = true;
-			Logger::GetLogger().LogString("Escape Key Detected, Terminating", LogType::LOG);
-		}
-	};
-
-	while (!ShouldTerminate && !glfwWindowShouldClose(window))
-	{
-		StartTime = glfwGetTime();
-		
-		glfwPollEvents();
-
-		scene.Update(DeltaTime);
-		renderScene.RenderScene(DeltaTime);
-
-		//std::stringstream stream;
-		//stream << DeltaTime << std::ends;
-
-		//Logger::GetLogger().LogString(stream.str(), LogType::LOG);
-
-		EndTime = glfwGetTime();
-
-		DeltaTime = static_cast<float>(EndTime - StartTime);
-
-	}
-
-	scene.DeInit();
-	renderScene.DeInitialize();
-	
+	RunMainLoop(window);
 
 	glfwTerminate();
 

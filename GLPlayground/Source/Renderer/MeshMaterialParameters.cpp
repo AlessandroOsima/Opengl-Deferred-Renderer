@@ -131,8 +131,8 @@ bool DeferredBlinnPhongMeshMaterialParameters::LinkParameters(Mesh * CurrentMesh
 	CurrentMesh->GetMaterial().AddUniform({ "material.Shininess", ShininessData, UniformType::Float });
 
 	UniformTypeData ColorTypeData;
-	ColorTypeData.floatVal = static_cast<int>(DiffuseColorType);
-	CurrentMesh->GetMaterial().AddUniform({ "material.DiffuseType", ColorTypeData, UniformType::Float });
+	ColorTypeData.IntVal = static_cast<int>(DiffuseColorType);
+	CurrentMesh->GetMaterial().AddUniform({ "material.DiffuseType", ColorTypeData, UniformType::Int });
 
 	return true;
 }
@@ -163,7 +163,7 @@ bool DeferredBlinnPhongMeshMaterialParameters::BindParameters(Mesh * CurrentMesh
 
 	auto ColorTypeDataUniform = CurrentMesh->GetMaterial().GetUniformByName("material.DiffuseType");
 	AssertWithMessage(ColorTypeDataUniform, "Have you linked the material data in the mesh ?");
-	ColorTypeDataUniform->TypeData.floatVal = static_cast<int>(DiffuseColorType);
+	ColorTypeDataUniform->TypeData.IntVal = static_cast<int>(DiffuseColorType);
 
 	return true;
 }

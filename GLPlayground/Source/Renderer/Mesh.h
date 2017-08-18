@@ -28,7 +28,7 @@ public:
 	void LinkMaterialData();
 
 	void Bind();
-	void Unbind();
+	void UnBind();
 
 	inline void SetVertexData(std::shared_ptr<VertexData> NewVertexData)
 	{

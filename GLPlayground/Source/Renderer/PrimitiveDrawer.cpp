@@ -57,7 +57,7 @@ void PrimitiveDrawer::Render()
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) + sizeof(glm::vec4), (GLvoid*)(sizeof(glm::vec3)));
 		glEnableVertexAttribArray(1);
 
-		glDrawArrays(GL_LINES, 0, Lines.size() * 2);
+		glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(Lines.size() * 2));
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -81,7 +81,7 @@ void PrimitiveDrawer::Render()
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec3) + sizeof(glm::vec4), (GLvoid*)(sizeof(glm::vec3)));
 		glEnableVertexAttribArray(1);
 
-		glDrawArrays(GL_POINTS, 0, Points.size());
+		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(Points.size()));
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

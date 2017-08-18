@@ -164,7 +164,7 @@ void FontRenderer::Render(GLRenderer & Renderer, float DeltaTime)
 
 		Renderer.DrawMesh(*renderData.TextMesh);
 
-		renderData.TextMesh->Unbind();
+		renderData.TextMesh->UnBind();
 	}
 
 	FontMaterial.UnBind();
